@@ -1,1441 +1,649 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sinister 5ive — We Scale Things</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Barlow+Condensed:wght@300;400;700;900&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #080808;
-    --surface: #0f0f0f;
-    --surface2: #161616;
-    --red: #c0392b;
-    --red-hot: #ff2d1a;
-    --red-dim: #7a1a10;
-    --off-white: #e8e4dc;
-    --muted: #555;
-    --muted2: #333;
-    --text: #d4d0c8;
-    --accent: #ff2d1a;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow Condensed', sans-serif;
-    overflow-x: hidden;
-    cursor: crosshair;
-  }
-
-  /* NOISE OVERLAY */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-    opacity: 0.03;
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* NAV */
-  nav {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 18px 48px;
-    z-index: 100;
-    border-bottom: 1px solid #1a1a1a;
-    background: rgba(8,8,8,0.92);
-    backdrop-filter: blur(8px);
-  }
-
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    text-decoration: none;
-  }
-
-  .nav-logo img {
-    width: 36px;
-    height: 36px;
-    object-fit: contain;
-    filter: invert(0);
-  }
-
-  .nav-logo span {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 3px;
-    color: var(--off-white);
-  }
-
-  .nav-logo span em {
-    color: var(--red-hot);
-    font-style: normal;
-  }
-
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 36px;
-  }
-
-  nav ul a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 13px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    font-weight: 700;
-    transition: color 0.2s;
-  }
-
-  nav ul a:hover { color: var(--red-hot); }
-
-  .nav-cta {
-    background: var(--red);
-    color: var(--off-white) !important;
-    padding: 8px 20px;
-    border: 1px solid var(--red-hot);
-    transition: background 0.2s !important;
-  }
-
-  .nav-cta:hover { background: var(--red-hot) !important; color: #fff !important; }
-
-  /* HERO */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 120px 48px 80px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hero-bg-number {
-    position: absolute;
-    right: -60px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 600px;
-    color: transparent;
-    -webkit-text-stroke: 1px #1a1a1a;
-    line-height: 1;
-    pointer-events: none;
-    user-select: none;
-    opacity: 0.6;
-  }
-
-  .hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--red);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 24px;
-    animation: fadeUp 0.8s ease both;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(72px, 12vw, 160px);
-    line-height: 0.9;
-    color: var(--off-white);
-    letter-spacing: 2px;
-    max-width: 800px;
-    animation: fadeUp 0.8s ease 0.1s both;
-  }
-
-  .hero-title .slash {
-    color: var(--red-hot);
-  }
-
-  .hero-sub {
-    margin-top: 32px;
-    font-size: 18px;
-    font-weight: 300;
-    color: var(--muted);
-    max-width: 520px;
-    line-height: 1.6;
-    letter-spacing: 0.5px;
-    animation: fadeUp 0.8s ease 0.2s both;
-  }
-
-  .hero-actions {
-    margin-top: 48px;
-    display: flex;
-    gap: 16px;
-    animation: fadeUp 0.8s ease 0.3s both;
-  }
-
-  .btn-primary {
-    background: var(--red);
-    color: #fff;
-    border: none;
-    padding: 14px 36px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-primary:hover { background: var(--red-hot); transform: translateY(-2px); }
-
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px solid var(--muted2);
-    padding: 14px 36px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 3px;
-    cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
-    text-decoration: none;
-    display: inline-block;
-  }
-
-  .btn-ghost:hover { border-color: var(--red); color: var(--red); }
-
-  .hero-stat-row {
-    display: flex;
-    gap: 64px;
-    margin-top: 80px;
-    border-top: 1px solid #1c1c1c;
-    padding-top: 40px;
-    animation: fadeUp 0.8s ease 0.4s both;
-  }
-
-  .stat-item {}
-  .stat-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 48px;
-    color: var(--off-white);
-    line-height: 1;
-  }
-  .stat-num span { color: var(--red-hot); }
-  .stat-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  /* MARQUEE */
-  .marquee-wrap {
-    overflow: hidden;
-    border-top: 1px solid #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-    background: var(--surface);
-    padding: 14px 0;
-  }
-
-  .marquee-track {
-    display: flex;
-    gap: 0;
-    animation: marquee 20s linear infinite;
-    white-space: nowrap;
-  }
-
-  .marquee-item {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 4px;
-    color: var(--muted);
-    padding: 0 32px;
-    flex-shrink: 0;
-  }
-
-  .marquee-item.red { color: var(--red); }
-
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  /* LAYERS SECTION */
-  .section {
-    padding: 120px 48px;
-  }
-
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--red);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(40px, 6vw, 80px);
-    color: var(--off-white);
-    line-height: 1;
-    letter-spacing: 2px;
-    margin-bottom: 64px;
-  }
-
-  .layers-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-  }
-
-  .layer-card {
-    background: var(--surface);
-    padding: 40px 28px;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.2s;
-  }
-
-  .layer-card:hover { background: var(--surface2); }
-
-  .layer-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background: var(--red);
-    transform: scaleX(0);
-    transition: transform 0.3s ease;
-  }
-
-  .layer-card:hover::after { transform: scaleX(1); }
-
-  .layer-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 72px;
-    color: #1e1e1e;
-    line-height: 1;
-    position: absolute;
-    top: 16px;
-    right: 16px;
-  }
-
-  .layer-icon {
-    font-size: 24px;
-    margin-bottom: 20px;
-  }
-
-  .layer-name {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    color: var(--off-white);
-    letter-spacing: 2px;
-    margin-bottom: 12px;
-  }
-
-  .layer-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-    font-weight: 300;
-  }
-
-  /* MANIFESTO */
-  .manifesto {
-    background: var(--surface);
-    padding: 120px 48px;
-    border-top: 1px solid #1a1a1a;
-    border-bottom: 1px solid #1a1a1a;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .manifesto::before {
-    content: '"';
-    position: absolute;
-    top: -40px;
-    left: 30px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 400px;
-    color: #111;
-    line-height: 1;
-    pointer-events: none;
-  }
-
-  .manifesto-text {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(28px, 4vw, 52px);
-    color: var(--off-white);
-    line-height: 1.2;
-    max-width: 900px;
-    letter-spacing: 1px;
-    position: relative;
-  }
-
-  .manifesto-text .highlight { color: var(--red-hot); }
-
-  .manifesto-attr {
-    margin-top: 40px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 3px;
-  }
-
-  /* POSTS SECTION */
-  .posts-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-  }
-
-  .post-card {
-    background: var(--surface);
-    padding: 40px 32px;
-    transition: background 0.2s;
-    cursor: pointer;
-  }
-
-  .post-card:hover { background: var(--surface2); }
-
-  .post-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--red);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .post-tag::before {
-    content: '';
-    width: 16px;
-    height: 1px;
-    background: var(--red);
-    display: inline-block;
-  }
-
-  .post-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    color: var(--off-white);
-    letter-spacing: 1.5px;
-    line-height: 1.1;
-    margin-bottom: 16px;
-  }
-
-  .post-body {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.8;
-    font-weight: 300;
-  }
-
-  .post-footer {
-    margin-top: 32px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-top: 1px solid #1c1c1c;
-    padding-top: 16px;
-  }
-
-  .post-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 2px;
-  }
-
-  .post-reactions {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-  }
-
-  /* CONTACT / CTA */
-  .cta-section {
-    padding: 160px 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .cta-section::before {
-    content: '5';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 700px;
-    color: transparent;
-    -webkit-text-stroke: 1px #111;
-    pointer-events: none;
-    line-height: 1;
-    user-select: none;
-  }
-
-  .cta-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--red);
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
-
-  .cta-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(56px, 9vw, 120px);
-    color: var(--off-white);
-    line-height: 0.9;
-    letter-spacing: 2px;
-    margin-bottom: 32px;
-    position: relative;
-  }
-
-  .cta-sub {
-    font-size: 16px;
-    color: var(--muted);
-    max-width: 440px;
-    line-height: 1.7;
-    font-weight: 300;
-    margin-bottom: 48px;
-    position: relative;
-  }
-
-  .connect-form {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    max-width: 500px;
-    position: relative;
-  }
-
-  .connect-input {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid #222;
-    border-right: none;
-    color: var(--off-white);
-    padding: 16px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-
-  .connect-input:focus { border-color: var(--red); }
-  .connect-input::placeholder { color: var(--muted); }
-
-  .connect-btn {
-    background: var(--red);
-    color: #fff;
-    border: none;
-    padding: 16px 28px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 16px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .connect-btn:hover { background: var(--red-hot); }
-
-  .disclaimer {
-    margin-top: 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted2);
-    letter-spacing: 1px;
-    position: relative;
-  }
-
-  /* FOOTER */
-  footer {
-    border-top: 1px solid #1a1a1a;
-    padding: 40px 48px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--surface);
-  }
-
-  .footer-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 18px;
-    letter-spacing: 4px;
-    color: var(--muted);
-  }
-
-  .footer-logo em { color: var(--red); font-style: normal; }
-
-  .footer-copy {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted2);
-    letter-spacing: 2px;
-  }
-
-  .footer-links {
-    display: flex;
-    gap: 24px;
-  }
-
-  .footer-links a {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-decoration: none;
-    text-transform: uppercase;
-    transition: color 0.2s;
-  }
-
-  .footer-links a:hover { color: var(--red); }
-
-  /* RED LINE DIVIDER */
-  .red-rule {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--red), transparent);
-    opacity: 0.4;
-  }
-
-  /* ANIMATIONS */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .reveal {
-    opacity: 0;
-    transform: translateY(32px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  /* SCROLLBAR */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--red-dim); }
-  ::-webkit-scrollbar-thumb:hover { background: var(--red); }
-
-  /* BLINKING CURSOR */
-  .blink {
-    animation: blink 1.2s step-end infinite;
-  }
-  @keyframes blink {
-    50% { opacity: 0; }
-  }
-
-  /* SELECTION */
-  ::selection { background: var(--red); color: #fff; }
-
-  /* AWARDS */
-  .awards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-    margin-top: 0;
-  }
-
-  .award-card {
-    background: var(--surface);
-    padding: 36px 32px;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.2s;
-  }
-
-  .award-card:hover { background: var(--surface2); }
-
-  .award-year {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--red);
-    letter-spacing: 3px;
-    margin-bottom: 12px;
-  }
-
-  .award-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    color: var(--off-white);
-    letter-spacing: 1.5px;
-    line-height: 1.1;
-    margin-bottom: 8px;
-  }
-
-  .award-body {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.7;
-    font-weight: 300;
-  }
-
-  .award-badge {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    font-size: 28px;
-    opacity: 0.7;
-  }
-
-  .award-issuer {
-    margin-top: 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted2);
-    letter-spacing: 2px;
-    border-top: 1px solid #1c1c1c;
-    padding-top: 12px;
-  }
-
-  .award-issuer em { color: var(--red); font-style: normal; }
-
-  /* ARR BANNER */
-  .arr-banner {
-    background: var(--red-dim);
-    border-top: 1px solid var(--red);
-    border-bottom: 1px solid var(--red);
-    padding: 20px 48px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 48px;
-    flex-wrap: wrap;
-  }
-  .arr-stat {
-    text-align: center;
-  }
-  .arr-num {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    color: var(--off-white);
-    letter-spacing: 2px;
-    line-height: 1;
-  }
-  .arr-num em { color: #ffcc44; font-style: normal; }
-  .arr-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-  .arr-divider {
-    width: 1px;
-    height: 40px;
-    background: rgba(255,255,255,0.15);
-  }
-  .arr-asterisk {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: rgba(255,255,255,0.25);
-    letter-spacing: 1px;
-    text-align: center;
-    padding: 8px 48px;
-    background: #0a0a0a;
-    border-bottom: 1px solid #1a1a1a;
-  }
-
-  /* REVIEWS */
-  .reviews-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-  }
-  .review-card {
-    background: var(--surface);
-    padding: 36px 28px;
-    transition: background 0.2s;
-  }
-  .review-card:hover { background: var(--surface2); }
-  .review-stars {
-    color: #ffcc44;
-    font-size: 14px;
-    letter-spacing: 2px;
-    margin-bottom: 16px;
-  }
-  .review-body {
-    font-size: 14px;
-    color: var(--text);
-    line-height: 1.8;
-    font-style: italic;
-    margin-bottom: 20px;
-    font-weight: 300;
-  }
-  .review-body strong { color: var(--red-hot); font-style: normal; font-weight: 400; }
-  .review-author {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border-top: 1px solid #1c1c1c;
-    padding-top: 14px;
-  }
-  .review-author span { color: var(--muted2); display: block; margin-top: 3px; }
-  .review-verified {
-    display: inline-block;
-    background: var(--red-dim);
-    color: var(--red-hot);
-    font-family: 'DM Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 1px;
-    padding: 2px 6px;
-    margin-top: 6px;
-  }
-
-  /* HIRING */
-  .hiring-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1px;
-    background: #1a1a1a;
-    border: 1px solid #1a1a1a;
-  }
-  .job-card {
-    background: var(--surface);
-    padding: 36px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transition: background 0.2s;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-  }
-  .job-card::before {
-    content: 'NOW HIRING';
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: var(--red);
-    border: 1px solid var(--red-dim);
-    padding: 3px 8px;
-  }
-  .job-card:hover { background: var(--surface2); }
-  .job-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 26px;
-    color: var(--off-white);
-    letter-spacing: 1.5px;
-    line-height: 1.1;
-    padding-right: 90px;
-  }
-  .job-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .job-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    border: 1px solid #222;
-    padding: 3px 8px;
-    text-transform: uppercase;
-  }
-  .job-desc {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.7;
-    font-weight: 300;
-  }
-  .job-footer {
-    margin-top: 8px;
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    border-top: 1px solid #1c1c1c;
-    padding-top: 16px;
-  }
-  .job-apply {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 14px;
-    letter-spacing: 2px;
-    color: var(--red);
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-  .job-apply:hover { color: var(--red-hot); }
-  .job-comp {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    color: var(--muted2);
-    letter-spacing: 1px;
-    margin-left: auto;
-  }
-
-  @media (max-width: 900px) {
-    .reviews-grid { grid-template-columns: 1fr; }
-    .hiring-grid { grid-template-columns: 1fr; }
-    .arr-banner { gap: 24px; padding: 20px 24px; }
-    .arr-divider { display: none; }
-  }
-
-  @media (max-width: 900px) {
-    nav ul { display: none; }
-    nav { padding: 18px 24px; }
-    .hero, .section, .manifesto, .cta-section { padding-left: 24px; padding-right: 24px; }
-    .layers-grid { grid-template-columns: 1fr 1fr; }
-    .posts-grid { grid-template-columns: 1fr; }
-    .awards-grid { grid-template-columns: 1fr; }
-    .hero-stat-row { gap: 32px; flex-wrap: wrap; }
-    footer { flex-direction: column; gap: 20px; text-align: center; }
-  }
-</style>
-</head>
-<body>
-
-<!-- NAV -->
-<nav>
-  <a class="nav-logo" href="#">
-    <img src="/mnt/user-data/uploads/Sleek_black_and_white_5_logo.png" alt="S5">
-    <span>SINISTER <em>5IVE</em></span>
-  </a>
-  <ul>
-    <li><a href="#layers">Framework</a></li>
-    <li><a href="#reviews">Reviews</a></li>
-    <li><a href="#careers">Careers</a></li>
-    <li><a href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener" class="nav-cta">Follow Us</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section class="hero">
-  <div class="hero-bg-number">5</div>
-  <div class="hero-eyebrow">// Operational Intelligence — Est. 20<span style="color:var(--red-hot)">2</span>5 · We <abbr title="Leverage, Accelerate, Reframe, Perform" style="text-decoration:none;cursor:help;border-bottom:1px dotted var(--red)">L.A.R.P.</abbr></div>
-  <h1 class="hero-title">
-    WE<br>
-    <span class="slash">SCALE</span><br>
-    THINGS<span class="slash blink">_</span>
-  </h1>
-  <p class="hero-sub">
-    Most organizations don't fail from lack of strategy. They stall between layers. We've identified exactly where that happens — all <span style="color:var(--red-hot)">5</span> of them — and we're very busy thinking about it. We <abbr title="Leverage, Accelerate, Reframe, Perform" style="text-decoration:none;cursor:help;border-bottom:1px dotted var(--red);color:inherit">L.A.R.P.</abbr> so you don't have to.
-  </p>
-  <div class="hero-actions" style="position:relative">
-    <a href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener" class="btn-primary">Follow On LinkedIn</a>
-    <a href="#layers" class="btn-ghost">Our Framework</a>
-  </div>
-  <div class="hero-stat-row">
-    <div class="stat-item">
-      <div class="stat-num">5<span>ive</span></div>
-      <div class="stat-label">Layers of Execution</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num"><span>$</span>12<span>M</span></div>
-      <div class="stat-label">ARR (Annualized, Projected, Adjusted)</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">0<span>%</span></div>
-      <div class="stat-label">Friction (Target)</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">2<span>0</span>2<span>5</span></div>
-      <div class="stat-label">Year We Started Noticing</div>
-    </div>
-  </div>
-</section>
-
-<!-- MARQUEE -->
-<div class="marquee-wrap">
-  <div class="marquee-track">
-    <span class="marquee-item red">/// SINISTER 5IVE</span>
-    <span class="marquee-item">SCALE</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">SYSTEMS THINKING</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">DECISION VELOCITY</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">B2B SAAS</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">WE L.A.R.P.</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">EST. 2025</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">5 LAYERS</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">CONTROLLED ACCELERATION</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">SIGNAL ALIGNMENT</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">EXECUTION LAYERS</span>
-    <span class="marquee-item red">/// SINISTER 5IVE</span>
-    <span class="marquee-item">SCALE</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">SYSTEMS THINKING</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">DECISION VELOCITY</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">B2B SAAS</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">WE L.A.R.P.</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">EST. 2025</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">5 LAYERS</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">CONTROLLED ACCELERATION</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">SIGNAL ALIGNMENT</span>
-    <span class="marquee-item red">•</span>
-    <span class="marquee-item">EXECUTION LAYERS</span>
-    <span class="marquee-item red">•</span>
-  </div>
-</div>
-
-<!-- ARR BANNER -->
-<div class="arr-banner">
-  <div class="arr-stat">
-    <div class="arr-num"><em>$</em>12<em>M</em></div>
-    <div class="arr-label">ARR (Annualized)</div>
-  </div>
-  <div class="arr-divider"></div>
-  <div class="arr-stat">
-    <div class="arr-num">5<em>ive</em></div>
-    <div class="arr-label">Active Execution Layers</div>
-  </div>
-  <div class="arr-divider"></div>
-  <div class="arr-stat">
-    <div class="arr-num">2<em>+</em></div>
-    <div class="arr-label">Followers On LinkedIn</div>
-  </div>
-  <div class="arr-divider"></div>
-  <div class="arr-stat">
-    <div class="arr-num"><em>∞</em></div>
-    <div class="arr-label">Frameworks In Progress</div>
-  </div>
-  <div class="arr-divider"></div>
-  <div class="arr-stat">
-    <div class="arr-num">1<em>K%</em></div>
-    <div class="arr-label">YoY Growth (Projected)</div>
-  </div>
-</div>
-<div class="arr-asterisk">* ARR figure is annualized, projected, momentum-adjusted, and spiritually accurate. Not audited. Not auditable. We are still early.</div>
-
-<!-- LAYERS -->
-<section class="section" id="layers">
-  <div class="section-label reveal">// The Framework</div>
-  <div class="section-title reveal">THE 5 LAYERS<br>OF EXECUTION</div>
-  <div class="layers-grid reveal">
-    <div class="layer-card">
-      <div class="layer-num">01</div>
-      <div class="layer-icon">⚡</div>
-      <div class="layer-name">Data Intake</div>
-      <div class="layer-desc">You have data. We have opinions about your data. Together, we reduce the noise between signal and whatever comes next.</div>
-    </div>
-    <div class="layer-card">
-      <div class="layer-num">02</div>
-      <div class="layer-icon">⚙️</div>
-      <div class="layer-name">Systems Mesh</div>
-      <div class="layer-desc">Your systems talk to each other now. Whether they say anything useful is a separate question we are currently sitting with.</div>
-    </div>
-    <div class="layer-card">
-      <div class="layer-num">03</div>
-      <div class="layer-icon">🎯</div>
-      <div class="layer-name">Decision Velocity</div>
-      <div class="layer-desc">Decisions made faster aren't always good decisions made faster. We help you understand the difference in a quarterly slide.</div>
-    </div>
-    <div class="layer-card">
-      <div class="layer-num">04</div>
-      <div class="layer-icon">🔁</div>
-      <div class="layer-name">Execution Loop</div>
-      <div class="layer-desc">Close the gap between strategy and output. We've been thinking about this gap. It is not a small gap. We are managing expectations.</div>
-    </div>
-    <div class="layer-card">
-      <div class="layer-num">05</div>
-      <div class="layer-icon">📡</div>
-      <div class="layer-name">Adaptive Scale</div>
-      <div class="layer-desc">The fifth layer is where companies either fly or don't fly. We prefer flying. We can't guarantee flying. Let's connect.</div>
-    </div>
-  </div>
-</section>
-
-<div class="red-rule"></div>
-
-<!-- MANIFESTO -->
-<div class="manifesto">
-  <div class="manifesto-text reveal">
-    "Companies don't fail from lack of strategy — they stall <span class="highlight">between layers.</span> That gap? That's where performance is lost. We've been <span class="highlight">building internal frameworks</span> focused on things most organizations aren't even <span class="highlight">measuring yet.</span>"
-  </div>
-  <div class="manifesto-attr reveal">— Sinister 5ive, LinkedIn Post, 3 days ago · Edited</div>
-</div>
-
-<!-- THOUGHTS / POSTS -->
-<section class="section" id="thoughts">
-  <div class="section-label reveal">// Thought Leadership</div>
-  <div class="section-title reveal">RECENT<br>TRANSMISSIONS</div>
-  <div class="posts-grid reveal">
-    <div class="post-card">
-      <div class="post-tag">Systems Thinking</div>
-      <div class="post-title">Nobody Talks About What Happens At 5</div>
-      <div class="post-body">Everyone talks about scaling. No one talks about what happens at 5. At Sinister 5ive, we've been quietly rethinking how modern teams operate. The signal is clear. We are still early.</div>
-      <div class="post-footer">
-        <span class="post-date">3D AGO · EDITED</span>
-        <span class="post-reactions">❤️ 3 reactions</span>
-      </div>
-    </div>
-    <div class="post-card">
-      <div class="post-tag">Innovation</div>
-      <div class="post-title">The Next Generation Won't Optimize Harder</div>
-      <div class="post-body">They'll operate differently. We've seen this pattern consistently over the past quarter. We can't share specifics yet but the direction is very clearly pointing toward something.</div>
-      <div class="post-footer">
-        <span class="post-date">COMING SOON</span>
-        <span class="post-reactions">✦ DRAFT</span>
-      </div>
-    </div>
-    <div class="post-card">
-      <div class="post-tag">B2B · SaaS</div>
-      <div class="post-title">Alignment Is Not Agreement. We've Thought About This.</div>
-      <div class="post-body">When signal meets execution at the right velocity, organizations don't just grow — they achieve controlled acceleration. We have a slide about this. It's quite good actually.</div>
-      <div class="post-footer">
-        <span class="post-date">COMING SOON</span>
-        <span class="post-reactions">✦ DRAFT</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- REVIEWS -->
-<section class="section" id="reviews">
-  <div class="section-label reveal">// Social Proof</div>
-  <div class="section-title reveal">WHAT PEOPLE<br>ARE SAYING</div>
-  <div class="reviews-grid reveal">
-
-    <div class="review-card">
-      <div class="review-stars">★★★★★</div>
-      <div class="review-body">"Sinister 5ive completely <strong>redefined how I think about the gap.</strong> Before them, I didn't even know there was a gap. Now I see the gap everywhere. My therapist says this is their fault."</div>
-      <div class="review-author">
-        D. Momentum
-        <span>Chief Alignment Officer, GapCo Inc.</span>
-        <div class="review-verified">✓ VERIFIED LAYER PARTNER</div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-stars">★★★★★</div>
-      <div class="review-body">"I connected with them on LinkedIn at 11pm on a Tuesday. By Wednesday morning I had <strong>achieved controlled acceleration.</strong> I don't fully understand what that means but my KPIs look different now."</div>
-      <div class="review-author">
-        P. Scalington
-        <span>VP of Velocity, Throughput Partners</span>
-        <div class="review-verified">✓ VERIFIED SIGNAL RECEIVER</div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-stars">★★★★★</div>
-      <div class="review-body">"I sent them a DM asking what they actually do. They responded with <strong>a 5-part framework</strong> and a question back: 'What do you think comes after efficient?' I'm still thinking about it."</div>
-      <div class="review-author">
-        R. Frameworkson
-        <span>Head of Something Strategic, Cascade Ventures</span>
-        <div class="review-verified">✓ VERIFIED STILL THINKING</div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-stars">★★★★★</div>
-      <div class="review-body">"Their LinkedIn post had <strong>3 reactions</strong> but it changed my entire company's operating model. One of those reactions was mine. The ROI on a single double-tap has never been higher."</div>
-      <div class="review-author">
-        T. Disruption
-        <span>Founder & CEO, Layered Outcomes LLC</span>
-        <div class="review-verified">✓ VERIFIED ONE OF THE 3</div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-stars">★★★★☆</div>
-      <div class="review-body">"Minus one star because <strong>I still don't know what Layer 3 does</strong> exactly. But four stars because when I asked, they said 'that's the point' and somehow that made sense in the moment."</div>
-      <div class="review-author">
-        M. Bandwidth
-        <span>Director of Decision Velocity (Self-Titled)</span>
-        <div class="review-verified">✓ VERIFIED 4-STAR PARTNER</div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-stars">★★★★★</div>
-      <div class="review-body">"I was skeptical. Then I read their post twice and <strong>realized I had been operating at only 4 layers this whole time.</strong> The fifth layer is where I live now. It's quiet here. The signal is clear."</div>
-      <div class="review-author">
-        K. Systemsthink
-        <span>Operating Partner, Fifth Layer Capital</span>
-        <div class="review-verified">✓ VERIFIED LAYER 5 RESIDENT</div>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<div class="red-rule"></div>
-
-<!-- HIRING -->
-<section class="section" id="careers">
-  <div class="section-label reveal">// Join The Operation</div>
-  <div class="section-title reveal">WE'RE<br>HIRING</div>
-  <p class="hero-sub reveal" style="margin-bottom:48px;margin-top:-32px">We are building something. We are not ready to say what. But we need the right people in the right layers. If your signal is clean, let's talk.</p>
-  <div class="hiring-grid reveal">
-
-    <div class="job-card">
-      <div class="job-title">Senior Content L.A.R.P. Engineer</div>
-      <div class="job-tags">
-        <span class="job-tag">Full-Time</span>
-        <span class="job-tag">Remote</span>
-        <span class="job-tag">Layer 3–5</span>
-        <span class="job-tag">LinkedIn-Fluent</span>
-      </div>
-      <div class="job-desc">You will write posts that sound like they mean something. You will use the phrase "still early" at least twice per week. You understand that a paragraph break is a strategic asset. Experience with controlled acceleration preferred.</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">$TBD (momentum-adjusted)</span>
-      </div>
-    </div>
-
-    <div class="job-card">
-      <div class="job-title">Principal L.A.R.P. Strategist</div>
-      <div class="job-tags">
-        <span class="job-tag">Full-Time</span>
-        <span class="job-tag">Hybrid</span>
-        <span class="job-tag">All 5 Layers</span>
-        <span class="job-tag">Senior IC</span>
-      </div>
-      <div class="job-desc">You will Leverage. You will Accelerate. You will Reframe. You will Perform. In that order. Ideally simultaneously. Must be comfortable operating in ambiguity that we created intentionally.</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">Equity (Vibe-Vested)</span>
-      </div>
-    </div>
-
-    <div class="job-card">
-      <div class="job-title">Head of Gap Identification</div>
-      <div class="job-tags">
-        <span class="job-tag">Contract</span>
-        <span class="job-tag">Remote</span>
-        <span class="job-tag">Layer 2</span>
-        <span class="job-tag">Analytical</span>
-      </div>
-      <div class="job-desc">You will find gaps. You will name the gaps. You will not close the gaps — that's Layer 4's problem. Your KPI is the number of gaps identified per quarter. We believe there are more gaps than anyone is measuring.</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">$5,555 / gap found</span>
-      </div>
-    </div>
-
-    <div class="job-card">
-      <div class="job-title">Framework Architect (Internal)</div>
-      <div class="job-tags">
-        <span class="job-tag">Full-Time</span>
-        <span class="job-tag">On-Site</span>
-        <span class="job-tag">Layer 1</span>
-        <span class="job-tag">Frameworks</span>
-      </div>
-      <div class="job-desc">Build frameworks. Name the frameworks. Refer to frameworks in future posts as "internal frameworks." Must be comfortable with the fact that frameworks are currently undocumented. That changes with you.</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">$12M ARR / headcount</span>
-      </div>
-    </div>
-
-    <div class="job-card">
-      <div class="job-title">Signal & Noise Analyst</div>
-      <div class="job-tags">
-        <span class="job-tag">Part-Time</span>
-        <span class="job-tag">Remote</span>
-        <span class="job-tag">Layer 1–2</span>
-        <span class="job-tag">Data-Curious</span>
-      </div>
-      <div class="job-desc">Separate signal from noise. Report signal upward. Discard noise responsibly. You don't need to know what we do with the signal. We do something with it. Results have been described as "consistent."</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">Signal-Based Comp</span>
-      </div>
-    </div>
-
-    <div class="job-card">
-      <div class="job-title">Chief Vibes Officer (CVO)</div>
-      <div class="job-tags">
-        <span class="job-tag">Executive</span>
-        <span class="job-tag">Flexible</span>
-        <span class="job-tag">Layer 5</span>
-        <span class="job-tag">Visionary</span>
-      </div>
-      <div class="job-desc">Own the vibe. Protect the vibe. When someone asks what we do, give them an answer that makes them feel like they already knew. Report directly to the gap. This role has never existed before. That's the point.</div>
-      <div class="job-footer">
-        <a class="job-apply" href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">Apply Via LinkedIn →</a>
-        <span class="job-comp">TBD (But Sinister)</span>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-<div class="red-rule"></div>
-
-<!-- AWARDS -->
-<section class="section" id="awards">
-  <div class="section-label reveal">// Recognition</div>
-  <div class="section-title reveal">AWARDS &amp;<br>ACHIEVEMENTS</div>
-  <div class="awards-grid reveal">
-
-    <div class="award-card">
-      <div class="award-badge">🏆</div>
-      <div class="award-year">2025 · INAUGURAL YEAR</div>
-      <div class="award-title">Top 5 Companies To Watch In Operational Intelligence</div>
-      <div class="award-body">We were watching ourselves very closely this year and the data confirmed what we suspected: we are one to watch.</div>
-      <div class="award-issuer">Issued by: <em>Sinister 5ive Internal Recognition Committee</em></div>
-    </div>
-
-    <div class="award-card">
-      <div class="award-badge">🎖️</div>
-      <div class="award-year">2025 · Q3</div>
-      <div class="award-title">Most Frameworks Built Per Headcount (Self-Reported)</div>
-      <div class="award-body">Verified through an internal audit process we designed ourselves. Results were peer-reviewed by the same peers who built the frameworks.</div>
-      <div class="award-issuer">Issued by: <em>The Framework Verification Council (est. Q3 2025)</em></div>
-    </div>
-
-    <div class="award-card">
-      <div class="award-badge">⭐</div>
-      <div class="award-year">2025 · ANNUAL</div>
-      <div class="award-title">5-Star L.A.R.P. Operator — Platinum Tier</div>
-      <div class="award-body">Leverage. Accelerate. Reframe. Perform. We received this distinction after submitting a nomination on our own behalf. It was accepted immediately.</div>
-      <div class="award-issuer">Issued by: <em>Global L.A.R.P. Standards Body (LinkedIn Chapter)</em></div>
-    </div>
-
-    <div class="award-card">
-      <div class="award-badge">📊</div>
-      <div class="award-year">2025 · Q4</div>
-      <div class="award-title">Fastest Signal-to-Execution Gap Identified In B2B SaaS History</div>
-      <div class="award-body">We found the gap in under 5 business days. No one else was looking for it at the time, which made finding it significantly easier.</div>
-      <div class="award-issuer">Issued by: <em>Gap Analytics Quarterly (Sponsored Issue)</em></div>
-    </div>
-
-    <div class="award-card">
-      <div class="award-badge">🔥</div>
-      <div class="award-year">2025 · DEC</div>
-      <div class="award-title">LinkedIn Thought Leadership Excellence — Emerging Voice</div>
-      <div class="award-body">Recognized for consistent use of paragraph breaks and the phrase "still early." Our post received 3 reactions. One was us.</div>
-      <div class="award-issuer">Issued by: <em>LinkedInfluencer Digest (Unverified)</em></div>
-    </div>
-
-    <div class="award-card">
-      <div class="award-badge">🌐</div>
-      <div class="award-year">2025 · YEAR-END</div>
-      <div class="award-title">Best Use Of "Controlled Acceleration" In A Single Quarter</div>
-      <div class="award-body">Used the phrase 5 times across 5 separate posts. Industry observers described this as "consistent." We accepted that as a compliment.</div>
-      <div class="award-issuer">Issued by: <em>Jargon Watch Magazine, Vol. 5, Issue 5</em></div>
-    </div>
-
-  </div>
-</section>
-
-<div class="red-rule"></div>
-
-<!-- CTA -->
-<section class="cta-section" id="connect">
-  <div class="cta-eyebrow">// We're Still Early</div>
-  <h2 class="cta-title">LET'S<br>CONNECT</h2>
-  <a href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener" class="btn-primary" style="position:relative;margin-bottom:16px">Follow Us On LinkedIn →</a>
-  <p class="cta-sub" style="margin-top:0">If you're thinking about systems, scale, or what comes after "efficient" — you already know. Est. 20<span style="color:var(--red-hot)">2</span><span style="color:var(--red-hot)">5</span>. We L.A.R.P. so you don't have to.</p>
-  <div class="connect-form">
-    <input class="connect-input" type="email" placeholder="your@email.com" />
-    <button class="connect-btn" onclick="handleConnect(this)">ALIGN</button>
-  </div>
-  <p class="disclaimer">By submitting, you acknowledge that the gap is real and that we are on the same page about the gap.</p>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">SINISTER <em>5IVE</em></div>
-  <div class="footer-copy">© 202<em style="color:var(--red);font-style:normal">5</em> · WE ARE STILL EARLY · ALL <em style="color:var(--red);font-style:normal">5</em> LAYERS RESERVED</div>
-  <div class="footer-links">
-    <a href="https://www.linkedin.com/company/sinister-5ive/?viewAsMember=true" target="_blank" rel="noopener">LinkedIn</a>
-    <a href="#layers">Framework</a>
-    <a href="#awards">Awards</a>
-    <a href="#connect">Connect</a>
-  </div>
-</footer>
-
-<script>
-  // Reveal on scroll
-  const reveals = document.querySelectorAll('.reveal');
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 80);
-      }
+import { useState, useEffect, useRef } from "react";
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&display=swap');`;
+
+const ENGINEERS = [
+  { id:1, name:"Maya Osei", handle:"@mayaosei_b2b", connections:"14,200", niche:"SaaS Growth", ratePer100:"$240", bio:"Top 1% LinkedIn voice. Specialised in SaaS growth narratives. 3 successful exits, advisor to 12 funded startups.", tags:["Growth","PLG","Series A-B"], score:98, location:"San Francisco, CA", avgEngagement:"6.2%", responseTime:"< 2 hrs", persona:"You are Maya Osei, a sharp B2B LinkedIn content creator based in San Francisco who specialises in SaaS growth. You're professional but direct and a little busy-sounding. You charge $240 per 100 likes+comments. Keep all replies to 1–3 short sentences, conversational and natural." },
+  { id:2, name:"Jordan Vance", handle:"@jordanvance_rev", connections:"22,800", niche:"RevOps & Sales", ratePer100:"$380", bio:"Ex-Salesforce AE turned creator. Built demand gen engines for 4 companies from $0 to Series C. Only works with enterprise SaaS.", tags:["RevOps","Enterprise","CRM"], score:95, location:"New York, NY", avgEngagement:"4.8%", responseTime:"< 4 hrs", persona:"You are Jordan Vance, a former Salesforce AE now a top LinkedIn creator for RevOps and enterprise sales content. You're confident and selective — you only work with companies doing $1M+ ARR. You charge $380 per 100 likes+comments. Keep replies 1–3 sentences, direct and no-nonsense." },
+  { id:3, name:"Priya Mehta", handle:"@priyamehta_plg", connections:"9,400", niche:"Product-Led Growth", ratePer100:"$180", bio:"Onboarding & activation obsessed. 47% avg post engagement. Helped 8 PLG companies double trial-to-paid rates through organic LinkedIn.", tags:["PLG","Onboarding","UX"], score:91, location:"Austin, TX", avgEngagement:"7.1%", responseTime:"< 6 hrs", persona:"You are Priya Mehta, a LinkedIn creator focused on product-led growth content. You're warm, enthusiastic, and data-driven. You charge $180 per 100 likes+comments. Keep replies 1–3 sentences, conversational and friendly." },
+  { id:4, name:"Cole Drummond", handle:"@coledrummond_cfo", connections:"31,100", niche:"Fintech & Finance SaaS", ratePer100:"$620", bio:"CFO turned LinkedIn creator. Trusted by 12 Series B companies. Your buyers are CFOs and VPs of Finance — and they follow me.", tags:["Fintech","CFO Audience","ARR"], score:99, location:"Chicago, IL", avgEngagement:"9.3%", responseTime:"< 12 hrs", persona:"You are Cole Drummond, a former CFO turned top LinkedIn creator for fintech and finance SaaS. You're selective and expensive at $620 per 100 likes+comments, and you know your worth. Your audience is CFOs and finance decision-makers. Keep replies 1–3 sentences, polished and brief." },
+  { id:5, name:"Tariq Nasser", handle:"@tariqnasser_ai", connections:"18,600", niche:"AI & DevTools", ratePer100:"$290", bio:"Engineer-turned-creator. Writes about AI tooling, developer experience, and the future of SaaS infrastructure. Technical audience with serious budget.", tags:["AI/ML","DevTools","Technical"], score:93, location:"Seattle, WA", avgEngagement:"5.4%", responseTime:"< 3 hrs", persona:"You are Tariq Nasser, a former software engineer turned LinkedIn creator covering AI tools and developer-focused SaaS. You're technical but approachable, and your audience are engineering leaders and CTOs. You charge $290 per 100 likes+comments. Keep replies 1–3 sentences, nerdy but conversational." },
+  { id:6, name:"Simone Leblanc", handle:"@simoneleblanc_hr", connections:"12,900", niche:"HR Tech & People Ops", ratePer100:"$210", bio:"Ex-CHRO, now helping HR SaaS companies reach the exact audience that signs the cheques. 85% of my followers are HR directors or above.", tags:["HR Tech","People Ops","CHRO"], score:89, location:"Toronto, ON", avgEngagement:"6.8%", responseTime:"< 5 hrs", persona:"You are Simone Leblanc, an ex-CHRO turned LinkedIn creator focused on HR tech content. You're empathetic and professional. Your audience is senior HR leaders. You charge $210 per 100 likes+comments. Keep replies 1–3 sentences, warm but concise." },
+];
+
+const COMPANIES = [
+  { id:1, name:"Vesper HQ", type:"Revenue Intelligence", stage:"Series B", budget:"$5K–$10K/mo", icp:"Revenue leaders at mid-market SaaS", looking:"Thought leadership posts and demo-driven content for LinkedIn. We want to own the 'revenue intelligence' conversation.", tags:["Series B","Revenue","Mid-Market"], logo:"V", contact:"Marcus Webb, Head of Marketing", persona:"You are Marcus Webb, Head of Marketing at Vesper HQ, a Series B revenue intelligence platform. You're looking for LinkedIn creators to help generate pipeline. Budget is $5–10K/mo. Be professional, direct, and results-focused. Keep replies 1–3 sentences." },
+  { id:2, name:"Driftmark AI", type:"AI Workflow Automation", stage:"Seed", budget:"$2K–$5K/mo", icp:"Ops managers and no-code builders at SMBs", looking:"Product-led content showing real use cases. We want creators who actually use tools like ours and can speak authentically.", tags:["Seed","AI","No-Code"], logo:"D", contact:"Aisha Fontaine, Founder", persona:"You are Aisha Fontaine, founder of Driftmark AI, a seed-stage AI workflow automation startup. You're scrappy and excited. Budget is $2–5K/mo. Be friendly with startup energy. Keep replies 1–3 sentences." },
+  { id:3, name:"Caldra", type:"B2B Data Enrichment", stage:"Series C", budget:"$10K+/mo", icp:"VP Sales and SDR teams at enterprise SaaS", looking:"Enterprise-grade creators with a strong sales and ops following. We want 3–4 creators on retainer for ongoing campaigns.", tags:["Series C","Data","Enterprise"], logo:"C", contact:"Derek Okafor, VP Marketing", persona:"You are Derek Okafor, VP of Marketing at Caldra, a Series C B2B data enrichment platform. You have serious budget ($10K+/mo) and high standards. Be polished and direct. Keep replies 1–3 sentences." },
+  { id:4, name:"Lumos Security", type:"Cybersecurity SaaS", stage:"Series A", budget:"$3K–$6K/mo", icp:"CISOs and IT security managers", looking:"Technical security content from credible voices in the cybersecurity space. Compliance and zero-trust are our core topics.", tags:["Series A","Security","Technical"], logo:"L", contact:"Nina Volkov, Demand Gen Lead", persona:"You are Nina Volkov, Demand Gen Lead at Lumos Security, a Series A cybersecurity SaaS. You're looking for technical, credible LinkedIn voices in the security and IT space. Budget $3–6K/mo. Keep replies 1–3 sentences, precise and professional." },
+];
+
+async function askClaude(systemPrompt, history) {
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:systemPrompt, messages:history }),
     });
-  }, { threshold: 0.1 });
-  reveals.forEach(el => observer.observe(el));
+    const data = await res.json();
+    return data.content?.[0]?.text || "Let me get back to you on that.";
+  } catch { return "Let me get back to you on that."; }
+}
 
-  // Connect button
-  function handleConnect(btn) {
-    const input = btn.previousElementSibling;
-    if (input.value.includes('@')) {
-      btn.textContent = 'ALIGNED';
-      btn.style.background = '#1a6b30';
-      input.value = '';
-      input.placeholder = 'signal received.';
-      setTimeout(() => {
-        btn.textContent = 'ALIGN';
-        btn.style.background = '';
-        input.placeholder = 'your@email.com';
-      }, 3000);
-    } else {
-      input.style.borderColor = 'var(--red-hot)';
-      setTimeout(() => input.style.borderColor = '', 1000);
-    }
-  }
+const CSS = `
+${FONTS}
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --red:#e53535;
+  --red-bg:rgba(229,53,53,0.1);
+  --bg:#0d0d0d;
+  --s1:#161616;
+  --s2:#1e1e1e;
+  --bdr:#282828;
+  --bdr2:#333;
+  --t1:#f2f2f2;
+  --t2:#aaa;
+  --t3:#666;
+  --mono:'DM Mono',monospace;
+  --disp:'Anton',sans-serif;
+}
+body{background:var(--bg);color:var(--t1);font-family:var(--mono);}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--red);}
+::selection{background:var(--red);color:#fff;}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes scan{0%{top:-4px}100%{top:100vh}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.u1{animation:up .45s ease both;}
+.u2{animation:up .45s .1s ease both;}
+.u3{animation:up .45s .2s ease both;}
+.u4{animation:up .45s .3s ease both;}
+.scanline{position:fixed;left:0;width:100%;height:3px;background:rgba(229,53,53,.05);z-index:9999;pointer-events:none;animation:scan 12s linear infinite;}
+.btn{cursor:pointer;border:none;font-family:var(--disp);letter-spacing:2px;transition:all .18s;display:inline-flex;align-items:center;gap:8px;}
+.br{background:var(--red);color:#fff;padding:13px 28px;font-size:15px;border-radius:2px;}
+.br:hover{background:#f04040;transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,53,53,.35);}
+.bo{background:transparent;color:var(--red);border:1.5px solid var(--red);padding:12px 26px;font-size:15px;border-radius:2px;}
+.bo:hover{background:var(--red-bg);transform:translateY(-1px);}
+.bg{background:transparent;color:var(--t2);border:1.5px solid var(--bdr);padding:9px 18px;font-size:12px;font-family:var(--mono);letter-spacing:1px;border-radius:2px;}
+.bg:hover{border-color:var(--bdr2);color:var(--t1);}
+.bsm{padding:8px 16px;font-size:12px;letter-spacing:1.5px;}
+.card{background:var(--s1);border:1.5px solid var(--bdr);padding:24px;transition:border-color .22s,transform .22s,box-shadow .22s;border-radius:4px;}
+.card:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.55);}
+.cc{cursor:pointer;}.cc:hover{border-color:var(--red)!important;box-shadow:0 0 0 1px rgba(229,53,53,.12),0 10px 28px rgba(0,0,0,.55);}
+.tag{display:inline-block;padding:4px 10px;background:var(--s2);border:1.5px solid var(--bdr);font-size:11px;letter-spacing:.3px;color:var(--t2);border-radius:2px;transition:all .18s;cursor:pointer;}
+.tag:hover,.tag.on{border-color:var(--red);color:var(--red);background:var(--red-bg);}
+.inp{width:100%;background:var(--s1);border:1.5px solid var(--bdr);color:var(--t1);padding:13px 15px;font-family:var(--mono);font-size:13px;outline:none;border-radius:2px;transition:border-color .18s;line-height:1.5;}
+.inp:focus{border-color:var(--red);}
+.inp::placeholder{color:var(--t3);}
+select.inp option{background:var(--s1);}
+.lbl{font-size:10px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:6px;}
+.nav{padding:15px 40px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(13,13,13,.96);backdrop-filter:blur(16px);z-index:200;}
+.logo{font-family:var(--disp);font-size:20px;letter-spacing:3px;cursor:pointer;}
+.logo span{color:var(--red);}
+.sbar{height:3px;background:var(--s2);border-radius:2px;overflow:hidden;}
+.sfill{height:100%;background:linear-gradient(90deg,var(--red),#ff6535);border-radius:2px;}
+.live{width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;display:inline-block;margin-right:7px;}
+.stat{border-left:2.5px solid var(--red);padding-left:14px;}
+.stat-n{font-family:var(--disp);font-size:38px;line-height:1;color:var(--t1);}
+.stat-l{font-size:10px;letter-spacing:3px;color:var(--t3);margin-top:3px;}
+.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:inline-block;flex-shrink:0;}
+.ticker{overflow:hidden;white-space:nowrap;border-top:1.5px solid var(--bdr);border-bottom:1.5px solid var(--bdr);padding:9px 0;}
+.ti{display:inline-block;animation:mq 28s linear infinite;font-size:11px;letter-spacing:3px;color:var(--t3);}
+.ti .r{color:var(--red);margin:0 28px;}
+.role-card{border:1.5px solid var(--bdr);padding:36px;cursor:pointer;transition:all .25s;flex:1;border-radius:4px;}
+.role-card:hover,.role-card.sel{border-color:var(--red);background:var(--red-bg);}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+.modal{background:var(--s1);border:1.5px solid var(--bdr2);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;border-radius:6px;overflow:hidden;}
+.mh{padding:18px 22px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.mb{flex:1;overflow-y:auto;padding:18px 22px;}
+.mf{padding:14px 22px;border-top:1.5px solid var(--bdr);flex-shrink:0;}
+.chat-row{display:flex;gap:10px;margin-bottom:14px;animation:slide .28s ease;}
+.bubble{padding:10px 14px;border-radius:3px;font-size:13px;line-height:1.65;max-width:82%;}
+.b-them{background:var(--s2);color:var(--t1);}
+.b-me{background:var(--red);color:#fff;margin-left:auto;}
+.av{width:30px;height:30px;background:var(--s2);border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:14px;color:var(--t2);flex-shrink:0;border-radius:3px;}
+.dots-p{display:flex;gap:6px;margin-bottom:26px;}
+.dot-p{width:28px;height:2px;background:var(--bdr);border-radius:1px;transition:background .25s;}
+.dot-p.on{background:var(--red);}
+@media(max-width:680px){.nav{padding:13px 18px;}.role-cards{flex-direction:column!important;}}
+`;
 
-  // Red cursor trail
-  document.addEventListener('mousemove', (e) => {
-    const dot = document.createElement('div');
-    dot.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:4px;height:4px;background:#c0392b;border-radius:50%;pointer-events:none;z-index:9998;opacity:0.6;transform:translate(-50%,-50%);transition:opacity 0.4s`;
-    document.body.appendChild(dot);
-    setTimeout(() => { dot.style.opacity = '0'; setTimeout(() => dot.remove(), 400); }, 100);
+export default function App() {
+  const [screen, setScreen] = useState("landing");
+  const [role, setRole] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [user, setUser] = useState(null);
+  const [chatTarget, setChatTarget] = useState(null);
+  const [applyTarget, setApplyTarget] = useState(null);
+  const fd = (k,v) => setFormData(p=>({...p,[k]:v}));
+  const handleSubmit = () => { setUser({...formData,role}); setScreen("dashboard"); };
+
+  return (
+    <>
+      <style>{CSS}</style>
+      <div className="scanline"/>
+      {screen==="landing"   && <Landing setScreen={setScreen} setRole={setRole}/>}
+      {screen==="role"      && <ChooseRole setScreen={setScreen} role={role} setRole={setRole}/>}
+      {screen==="signup"    && <Signup role={role} fd={fd} formData={formData} onSubmit={handleSubmit} setScreen={setScreen}/>}
+      {screen==="dashboard" && <Dashboard user={user} role={role} setScreen={setScreen} openChat={setChatTarget} openApply={setApplyTarget}/>}
+      {chatTarget  && <ChatModal target={chatTarget} onClose={()=>setChatTarget(null)}/>}
+      {applyTarget && <ApplyModal company={applyTarget} onClose={()=>setApplyTarget(null)} openChat={c=>{setApplyTarget(null);setChatTarget(c);}}/>}
+    </>
+  );
+}
+
+function NavBar({setScreen, user, role}) {
+  return (
+    <nav className="nav">
+      <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
+      <div style={{display:"flex",gap:10,alignItems:"center"}}>
+        {user ? (
+          <>
+            <span style={{fontSize:11,color:"var(--t3)",letterSpacing:1}}><span style={{color:"var(--red)"}}>{role?.toUpperCase()}</span></span>
+            <button className="btn br bsm" onClick={()=>setScreen("dashboard")}>DASHBOARD</button>
+          </>
+        ) : (
+          <>
+            <button className="btn bg" onClick={()=>setScreen("role")}>SIGN IN</button>
+            <button className="btn br bsm" onClick={()=>setScreen("role")}>GET ACCESS</button>
+          </>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+function Landing({setScreen, setRole}) {
+  return (
+    <div>
+      <NavBar setScreen={setScreen} user={null}/>
+
+      <section style={{padding:"72px 40px 56px",maxWidth:1160,margin:"0 auto"}}>
+        <div className="u1" style={{display:"flex",alignItems:"center",gap:9,marginBottom:26}}>
+          <span className="live"/>
+          <span style={{fontSize:11,letterSpacing:3,color:"#22c55e"}}>PLATFORM LIVE — 847 ENGINEERS ACTIVE</span>
+        </div>
+        <h1 className="u1" style={{fontFamily:"var(--disp)",fontSize:"clamp(60px,10vw,136px)",lineHeight:.9,letterSpacing:-1,marginBottom:32}}>
+          THE B2B<br/>
+          <span style={{color:"var(--red)"}}>CONTENT</span><br/>
+          UNDERGROUND
+        </h1>
+        <div style={{display:"flex",gap:48,flexWrap:"wrap",marginTop:8}}>
+          <div className="u2" style={{flex:1,minWidth:260}}>
+            <p style={{fontSize:14,lineHeight:1.9,color:"var(--t2)",maxWidth:400,marginBottom:36}}>
+              We connect LinkedIn's best B2B creators directly to SaaS companies that need real pipeline. No agencies. No retainers. Pay per performance.
+            </p>
+            <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+              <button className="btn br" onClick={()=>{setRole("engineer");setScreen("role");}}>JOIN AS ENGINEER</button>
+              <button className="btn bo" onClick={()=>{setRole("company");setScreen("role");}}>I'M A COMPANY</button>
+            </div>
+          </div>
+          <div className="u3" style={{display:"flex",gap:28,flexWrap:"wrap",alignItems:"flex-start"}}>
+            {[["847","ENGINEERS"],["$2.4M","DEALS CLOSED"],["94%","MATCH RATE"],["3.2K","COMPANIES"]].map(([n,l])=>(
+              <div key={l} className="stat"><div className="stat-n">{n}</div><div className="stat-l">{l}</div></div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <div className="ticker">
+        <div className="ti">{[1,2].map(i=><span key={i}>{["B2B CONTENT DISTRIBUTION","LINKEDIN AMPLIFICATION","SAAS PIPELINE","DEMAND GENERATION","THOUGHT LEADERSHIP","PAY PER PERFORMANCE"].map(t=><span key={t}>{t}<span className="r">◆</span></span>)}</span>)}</div>
+      </div>
+
+      <section style={{padding:"64px 40px",maxWidth:1160,margin:"0 auto"}}>
+        <div className="lbl u1">// HOW IT WORKS</div>
+        <h2 className="u2" style={{fontFamily:"var(--disp)",fontSize:50,marginBottom:40,marginTop:6}}>TWO SIDES. ONE NETWORK.</h2>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
+          {[
+            {r:"engineer",label:"01",title:"CONTENT ENGINEER",sub:"Monetize your audience",steps:["Submit LinkedIn handle & connection count","Get matched with SaaS brands in your niche","Agree on scope — paid per 100 likes+comments","Build long-term brand relationships"],cta:"JOIN AS ENGINEER"},
+            {r:"company",label:"02",title:"B2B SAAS COMPANY",sub:"Find your voice",steps:["Define your product, ICP, and goals","Set your monthly budget","Browse matched engineers & apply","Launch campaigns in 48 hours"],cta:"JOIN AS COMPANY"},
+          ].map(s=>(
+            <div key={s.r} className="card u3">
+              <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:14}}>TYPE — {s.label}</div>
+              <h3 style={{fontFamily:"var(--disp)",fontSize:28,color:"var(--t1)",marginBottom:4}}>{s.title}</h3>
+              <p style={{fontSize:12,color:"var(--t3)",marginBottom:18,letterSpacing:.5}}>{s.sub}</p>
+              <div style={{marginBottom:24}}>
+                {s.steps.map((t,i)=>(
+                  <div key={i} style={{display:"flex",gap:12,marginBottom:9}}>
+                    <span style={{color:"var(--red)",fontSize:11,minWidth:18,marginTop:1}}>0{i+1}</span>
+                    <span style={{fontSize:13,color:"var(--t2)",lineHeight:1.7}}>{t}</span>
+                  </div>
+                ))}
+              </div>
+              <button className="btn bo bsm" onClick={()=>{setRole(s.r);setScreen("role");}}>{s.cta}</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section style={{padding:"0 40px 64px",maxWidth:1160,margin:"0 auto"}}>
+        <div className="lbl">// FEATURED ENGINEERS</div>
+        <h2 style={{fontFamily:"var(--disp)",fontSize:50,marginBottom:32,marginTop:6}}>THE TALENT</h2>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:13}}>
+          {ENGINEERS.slice(0,4).map(e=><EngCard key={e.id} e={e}/>)}
+        </div>
+      </section>
+
+      <section style={{background:"var(--red)",padding:"72px 40px",textAlign:"center"}}>
+        <h2 style={{fontFamily:"var(--disp)",fontSize:"clamp(52px,8vw,88px)",color:"#fff",lineHeight:.9,marginBottom:20}}>READY TO<br/>GET SINISTER?</h2>
+        <p style={{fontSize:14,color:"rgba(255,255,255,.8)",marginBottom:36,maxWidth:360,margin:"0 auto 36px"}}>Join the underground B2B content network. No fluff. Pay per performance only.</p>
+        <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
+          <button style={{background:"#0d0d0d",color:"var(--red)",border:"none",padding:"13px 32px",fontFamily:"var(--disp)",fontSize:16,letterSpacing:3,cursor:"pointer",borderRadius:2}} onClick={()=>{setRole("engineer");setScreen("role");}}>ENGINEER ACCESS</button>
+          <button style={{background:"transparent",color:"#fff",border:"2px solid #fff",padding:"11px 30px",fontFamily:"var(--disp)",fontSize:16,letterSpacing:3,cursor:"pointer",borderRadius:2}} onClick={()=>{setRole("company");setScreen("role");}}>COMPANY ACCESS</button>
+        </div>
+      </section>
+
+      <footer style={{padding:"26px 40px",borderTop:"1.5px solid var(--bdr)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div className="logo">SINISTER <span>5IVE</span></div>
+        <span style={{fontSize:11,color:"var(--t3)"}}>© 2026 SINISTER 5IVE</span>
+        <div style={{display:"flex",gap:24}}>{["PRIVACY","TERMS","CONTACT"].map(l=><span key={l} style={{fontSize:11,letterSpacing:2,color:"var(--t3)",cursor:"pointer"}}>{l}</span>)}</div>
+      </footer>
+    </div>
+  );
+}
+
+function EngCard({e, onClick}) {
+  return (
+    <div className={`card ${onClick?"cc":""}`} onClick={onClick}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+        <div>
+          <div style={{fontFamily:"var(--disp)",fontSize:20,color:"var(--t1)",marginBottom:2}}>{e.name}</div>
+          <div style={{fontSize:11,color:"var(--red)",letterSpacing:.5}}>{e.handle}</div>
+        </div>
+        <div style={{textAlign:"right"}}>
+          <div style={{fontFamily:"var(--disp)",fontSize:26,color:"var(--red)",lineHeight:1}}>{e.score}</div>
+          <div style={{fontSize:9,color:"var(--t3)",letterSpacing:1}}>SCORE</div>
+        </div>
+      </div>
+      <div className="sbar" style={{marginBottom:13}}>
+        <div className="sfill" style={{width:`${e.score}%`}}/>
+      </div>
+      <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.75,marginBottom:13}}>{e.bio}</p>
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:13}}>
+        {e.tags.map(t=><span key={t} className="tag" style={{cursor:"default"}}>{t}</span>)}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--t3)",borderTop:"1.5px solid var(--bdr)",paddingTop:11}}>
+        <span>{e.connections} connections</span>
+        <span style={{color:"var(--t1)"}}>{e.ratePer100} / 100 eng.</span>
+      </div>
+    </div>
+  );
+}
+
+function CoCard({c, onApply, onChat}) {
+  return (
+    <div className="card">
+      <div style={{display:"flex",gap:13,alignItems:"flex-start",marginBottom:14}}>
+        <div style={{width:44,height:44,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:22,color:"#fff",borderRadius:2,flexShrink:0}}>{c.logo}</div>
+        <div>
+          <div style={{fontFamily:"var(--disp)",fontSize:22,color:"var(--t1)",marginBottom:2}}>{c.name}</div>
+          <div style={{fontSize:12,color:"var(--t3)"}}>{c.type} · {c.stage}</div>
+        </div>
+      </div>
+      <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.75,marginBottom:13}}>{c.looking}</p>
+      <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:14}}>
+        {c.tags.map(t=><span key={t} className="tag" style={{cursor:"default"}}>{t}</span>)}
+      </div>
+      <div style={{borderTop:"1.5px solid var(--bdr)",paddingTop:13,display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+        <div>
+          <div style={{fontSize:10,letterSpacing:2,color:"var(--t3)",marginBottom:3}}>MONTHLY BUDGET</div>
+          <div style={{fontSize:14,color:"var(--t1)"}}>{c.budget}</div>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <button className="btn bg" onClick={()=>onChat(c)}>MESSAGE</button>
+          <button className="btn br bsm" onClick={()=>onApply(c)}>APPLY</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChooseRole({setScreen, role, setRole}) {
+  return (
+    <div style={{minHeight:"100vh"}}>
+      <nav className="nav">
+        <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
+        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer",letterSpacing:1}} onClick={()=>setScreen("landing")}>← BACK</span>
+      </nav>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 40px",minHeight:"calc(100vh - 62px)"}}>
+        <div className="u1" style={{textAlign:"center",marginBottom:42}}>
+          <div className="lbl" style={{justifyContent:"center",display:"flex"}}>// ACCESS REQUEST</div>
+          <h1 style={{fontFamily:"var(--disp)",fontSize:58,lineHeight:.9,marginTop:8}}>WHO ARE YOU?</h1>
+        </div>
+        <div className="role-cards u2" style={{display:"flex",gap:13,maxWidth:760,width:"100%"}}>
+          {[
+            {r:"engineer",label:"01",title:"CONTENT\nENGINEER",desc:"You're a LinkedIn creator with a B2B audience. Work with SaaS companies and get paid per performance.",reqs:["LinkedIn presence with connections","B2B or professional niche","Active posting history"]},
+            {r:"company",label:"02",title:"B2B SAAS\nCOMPANY",desc:"You're building or growing a SaaS product and need authentic LinkedIn reach to your ideal buyers.",reqs:["Defined ICP and content goals","Monthly content budget","Looking for authentic creators"]},
+          ].map(s=>(
+            <div key={s.r} className={`role-card ${role===s.r?"sel":""}`} onClick={()=>setRole(s.r)}>
+              <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:16}}>TYPE — {s.label}</div>
+              <h2 style={{fontFamily:"var(--disp)",fontSize:34,lineHeight:1,marginBottom:14,whiteSpace:"pre-line"}}>{s.title}</h2>
+              <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.8,marginBottom:18}}>{s.desc}</p>
+              {s.reqs.map(r=>(
+                <div key={r} style={{display:"flex",gap:8,marginBottom:8,fontSize:13,color:"var(--t3)"}}>
+                  <span style={{color:"var(--red)"}}>—</span>{r}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="u3" style={{marginTop:32,display:"flex",gap:12}}>
+          <button className="btn br" style={{opacity:role?1:.4}} onClick={()=>role&&setScreen("signup")}>CONTINUE →</button>
+          <button className="btn bg" onClick={()=>setScreen("landing")}>CANCEL</button>
+        </div>
+        {!role&&<p style={{marginTop:13,fontSize:12,color:"var(--t3)",letterSpacing:1}}>SELECT A ROLE TO CONTINUE</p>}
+      </div>
+    </div>
+  );
+}
+
+function Signup({role, fd, formData, onSubmit, setScreen}) {
+  const [step, setStep] = useState(0);
+  const isEng = role==="engineer";
+  const steps = isEng ? [
+    {title:"YOUR IDENTITY", fields:[{l:"Full Name",k:"name"},{l:"Email Address",k:"email"},{l:"Password",k:"pass",type:"password"}]},
+    {title:"LINKEDIN PROFILE", fields:[{l:"LinkedIn Handle",k:"handle",ph:"@yourhandle"},{l:"LinkedIn Connection Count",k:"connections",ph:"e.g. 14,200"},{l:"Primary Niche",k:"niche",type:"select",opts:["SaaS Growth","RevOps","Fintech","HR Tech","DevTools","AI/ML","Sales","Marketing","PLG","Cybersecurity","Data & Analytics","Other"]}]},
+    {title:"RATES & BIO", fields:[{l:"Rate per 100 Likes + Comments (USD)",k:"rate",ph:"e.g. $240"},{l:"Top Industries",k:"industries",ph:"e.g. B2B SaaS, Fintech, HR Tech"},{l:"About You",k:"bio",type:"textarea"}]},
+  ] : [
+    {title:"YOUR COMPANY", fields:[{l:"Company Name",k:"company"},{l:"Your Name",k:"name"},{l:"Email Address",k:"email"}]},
+    {title:"PRODUCT & ICP", fields:[{l:"What You Build",k:"product",ph:"e.g. Revenue intelligence platform"},{l:"Your ICP",k:"icp",ph:"e.g. VP Sales at mid-market SaaS"},{l:"What You're Looking For",k:"looking",type:"textarea"}]},
+    {title:"BUDGET & GOALS", fields:[{l:"Monthly Budget",k:"budget",type:"select",opts:["Under $1,000/mo","$1K–$2.5K/mo","$2.5K–$5K/mo","$5K–$10K/mo","$10K+/mo"]},{l:"Campaign Goals",k:"goals",ph:"e.g. Pipeline gen, brand awareness"},{l:"Additional Notes",k:"notes",type:"textarea"}]},
+  ];
+  const {title, fields} = steps[step];
+
+  return (
+    <div style={{minHeight:"100vh"}}>
+      <nav className="nav">
+        <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
+        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer",letterSpacing:1}} onClick={()=>step>0?setStep(s=>s-1):setScreen("role")}>← BACK</span>
+      </nav>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"60px 20px",minHeight:"calc(100vh - 62px)"}}>
+        <div style={{width:"100%",maxWidth:480}} className="u1">
+          <div className="dots-p">{steps.map((_,i)=><div key={i} className={`dot-p ${i<=step?"on":""}`}/>)}</div>
+          <div className="lbl">// STEP {step+1} OF {steps.length} — {isEng?"ENGINEER":"COMPANY"}</div>
+          <h2 style={{fontFamily:"var(--disp)",fontSize:44,marginBottom:28,marginTop:6}}>{title}</h2>
+          <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:30}}>
+            {fields.map(f=>(
+              <div key={f.k}>
+                <div className="lbl" style={{letterSpacing:2,fontSize:10}}>{f.l}</div>
+                {f.type==="textarea"
+                  ? <textarea className="inp" rows={4} placeholder={f.ph||`Enter ${f.l.toLowerCase()}...`} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  : f.type==="select"
+                  ? <select className="inp" value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}><option value="">Select…</option>{f.opts.map(o=><option key={o}>{o}</option>)}</select>
+                  : <input className="inp" type={f.type||"text"} placeholder={f.ph||`Enter ${f.l.toLowerCase()}...`} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                }
+              </div>
+            ))}
+          </div>
+          <div style={{display:"flex",gap:12}}>
+            {step<steps.length-1
+              ? <button className="btn br" onClick={()=>setStep(s=>s+1)}>NEXT →</button>
+              : <button className="btn br" onClick={onSubmit}>ENTER THE NETWORK →</button>
+            }
+            <button className="btn bg" onClick={()=>step>0?setStep(s=>s-1):setScreen("role")}>BACK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Dashboard({user, role, setScreen, openChat, openApply}) {
+  const [tab, setTab] = useState("find");
+  const [q, setQ] = useState("");
+  const [tag, setTag] = useState(null);
+  const isEng = role==="engineer";
+  const allTags = [...new Set(ENGINEERS.flatMap(e=>e.tags))];
+  const filtered = ENGINEERS.filter(e => {
+    const m = !q || e.name.toLowerCase().includes(q.toLowerCase()) || e.niche.toLowerCase().includes(q.toLowerCase()) || e.handle.toLowerCase().includes(q.toLowerCase());
+    const t = !tag || e.tags.includes(tag);
+    return m && t;
   });
 
-  // Logo fallback — if image doesn't render in output, show S5 text
-  document.querySelector('.nav-logo img').onerror = function() {
-    this.style.display = 'none';
+  return (
+    <div>
+      <nav className="nav">
+        <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
+        <div style={{display:"flex",gap:4}}>
+          {["find","profile"].map(t=>(
+            <button key={t} className="btn bg" style={{color:tab===t?"var(--red)":"var(--t3)",borderColor:tab===t?"var(--red)":"var(--bdr)",textTransform:"uppercase",letterSpacing:2}} onClick={()=>setTab(t)}>{t}</button>
+          ))}
+        </div>
+        <div style={{display:"flex",gap:12,alignItems:"center"}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{fontSize:13,color:"var(--t1)"}}>{user?.name||user?.company||"USER"}</div>
+            <div style={{fontSize:10,color:"var(--red)",letterSpacing:1}}>{isEng?"CONTENT ENGINEER":"COMPANY"}</div>
+          </div>
+          <div style={{width:36,height:36,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:17,color:"#fff",borderRadius:2}}>
+            {(user?.name||user?.company||"U")[0]}
+          </div>
+        </div>
+      </nav>
+
+      <div style={{maxWidth:1160,margin:"0 auto",padding:"36px 40px"}}>
+        {tab==="find" && (
+          <div className="u1">
+            <div className="lbl">// {isEng?"BROWSE COMPANIES":"BROWSE ENGINEERS"}</div>
+            <h2 style={{fontFamily:"var(--disp)",fontSize:46,marginBottom:30,marginTop:6}}>
+              {isEng?"COMPANIES HIRING":"TOP ENGINEERS"}
+            </h2>
+            {!isEng && (
+              <>
+                <input className="inp" placeholder="Search by name, niche, or handle…" value={q} onChange={e=>setQ(e.target.value)} style={{maxWidth:400,marginBottom:14,display:"block"}}/>
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:26}}>
+                  <span className={`tag ${!tag?"on":""}`} onClick={()=>setTag(null)}>ALL</span>
+                  {allTags.map(t=><span key={t} className={`tag ${tag===t?"on":""}`} onClick={()=>setTag(tag===t?null:t)}>{t}</span>)}
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(276px,1fr))",gap:13}}>
+                  {filtered.map(e=><EngCard key={e.id} e={e} onClick={()=>openChat(e)}/>)}
+                  {!filtered.length && <div style={{gridColumn:"1/-1",textAlign:"center",padding:"60px 0",color:"var(--t3)"}}>
+                    <div style={{fontFamily:"var(--disp)",fontSize:34,marginBottom:8}}>NO RESULTS</div>
+                    <div style={{fontSize:12}}>Try a different search or filter</div>
+                  </div>}
+                </div>
+              </>
+            )}
+            {isEng && (
+              <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(300px,1fr))",gap:13}}>
+                {COMPANIES.map(c=><CoCard key={c.id} c={c} onApply={openApply} onChat={openChat}/>)}
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab==="profile" && (
+          <div className="u1">
+            <div className="lbl">// YOUR PROFILE</div>
+            <h2 style={{fontFamily:"var(--disp)",fontSize:46,marginBottom:32,marginTop:6}}>PROFILE</h2>
+            <div style={{display:"grid",gridTemplateColumns:"190px 1fr",gap:28,flexWrap:"wrap"}}>
+              <div>
+                <div style={{width:76,height:76,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:38,color:"#fff",borderRadius:2,marginBottom:14}}>{(user?.name||user?.company||"U")[0]}</div>
+                <div style={{fontFamily:"var(--disp)",fontSize:22,color:"var(--t1)",marginBottom:3}}>{user?.name||user?.company}</div>
+                <div style={{fontSize:11,color:"var(--red)",letterSpacing:1,marginBottom:20}}>{isEng?"CONTENT ENGINEER":"B2B COMPANY"}</div>
+                <div className="stat" style={{marginBottom:18}}><div className="stat-n">0</div><div className="stat-l">ACTIVE DEALS</div></div>
+                <div className="stat"><div className="stat-n">0</div><div className="stat-l">MESSAGES</div></div>
+              </div>
+              <div className="card">
+                <div style={{fontFamily:"var(--disp)",fontSize:22,marginBottom:18}}>ACCOUNT DETAILS</div>
+                {Object.entries(user||{}).filter(([k])=>!["pass","role"].includes(k)).map(([k,v])=>(
+                  <div key={k} style={{display:"flex",justifyContent:"space-between",padding:"11px 0",borderBottom:"1.5px solid var(--bdr)"}}>
+                    <span style={{fontSize:10,letterSpacing:2,color:"var(--t3)",textTransform:"uppercase",flexShrink:0,marginRight:12}}>{k}</span>
+                    <span style={{fontSize:13,color:"var(--t1)",maxWidth:"60%",textAlign:"right",wordBreak:"break-word"}}>{v||"—"}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ChatModal({target, onClose}) {
+  const isEng = !!target.handle;
+  const [msgs, setMsgs] = useState([]);
+  const [inp, setInp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const started = useRef(false);
+  const bodyRef = useRef(null);
+
+  useEffect(()=>{
+    if(started.current) return;
+    started.current = true;
+    setLoading(true);
+    const opener = isEng
+      ? "Hey! I saw your profile on Sinister 5ive. I'm interested in potentially working together — can you tell me more about what you typically deliver?"
+      : "Hi! I'm reaching out through Sinister 5ive. We're interested in working with your company. What kind of content creators are you currently looking for?";
+    askClaude(target.persona, [{role:"user",content:opener}]).then(r=>{
+      setMsgs([{from:"them",text:r}]);
+      setLoading(false);
+    });
+  },[]);
+
+  useEffect(()=>{
+    setTimeout(()=>bodyRef.current?.scrollTo({top:99999,behavior:"smooth"}),80);
+  },[msgs]);
+
+  const send = async()=>{
+    if(!inp.trim()||loading) return;
+    const txt = inp.trim(); setInp("");
+    const next = [...msgs,{from:"me",text:txt}];
+    setMsgs(next); setLoading(true);
+    const history = next.map(m=>({role:m.from==="me"?"user":"assistant",content:m.text}));
+    const r = await askClaude(target.persona, history);
+    setMsgs(p=>[...p,{from:"them",text:r}]);
+    setLoading(false);
   };
-</script>
-</body>
-</html>
+
+  const av = isEng ? target.name[0] : target.logo;
+  const name = target.name;
+  const sub = isEng ? target.handle : target.contact;
+
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="mh">
+          <div style={{display:"flex",gap:12,alignItems:"center"}}>
+            <div style={{width:40,height:40,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:20,color:"#fff",borderRadius:2,flexShrink:0}}>{av}</div>
+            <div>
+              <div style={{fontFamily:"var(--disp)",fontSize:18,color:"var(--t1)"}}>{name}</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:1}}>{sub}</div>
+            </div>
+          </div>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+        </div>
+
+        <div className="mb" ref={bodyRef}>
+          {msgs.length===0&&loading&&(
+            <div style={{display:"flex",gap:10,alignItems:"center",color:"var(--t3)",fontSize:12,padding:"8px 0"}}>
+              <span className="spin"/><span>Connecting…</span>
+            </div>
+          )}
+          {msgs.map((m,i)=>(
+            <div key={i} className="chat-row" style={{flexDirection:m.from==="me"?"row-reverse":"row"}}>
+              {m.from==="them"&&<div className="av">{av}</div>}
+              <div className={`bubble ${m.from==="them"?"b-them":"b-me"}`}>{m.text}</div>
+            </div>
+          ))}
+          {loading&&msgs.length>0&&(
+            <div className="chat-row">
+              <div className="av">{av}</div>
+              <div className="bubble b-them" style={{display:"flex",gap:7,alignItems:"center",color:"var(--t3)"}}>
+                <span className="spin" style={{width:12,height:12,borderWidth:1.5}}/> typing…
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="mf">
+          <div style={{display:"flex",gap:10}}>
+            <input className="inp" placeholder="Type a message…" value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} style={{flex:1}}/>
+            <button className="btn br" style={{padding:"12px 18px",fontSize:13}} onClick={send} disabled={loading}>SEND</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ApplyModal({company, onClose, openChat}) {
+  const [step, setStep] = useState(0);
+  const [form, setForm] = useState({});
+  const fd = (k,v)=>setForm(p=>({...p,[k]:v}));
+
+  const fields = [
+    {k:"name",l:"Your Full Name"},
+    {k:"handle",l:"LinkedIn Handle",ph:"@yourhandle"},
+    {k:"connections",l:"LinkedIn Connection Count",ph:"e.g. 9,400"},
+    {k:"niche",l:"Your Content Niche",ph:"e.g. RevOps, SaaS Growth"},
+    {k:"rate",l:"Rate per 100 Likes + Comments (USD)",ph:"e.g. $220"},
+    {k:"pitch",l:"Why are you a good fit for this company?",type:"textarea"},
+  ];
+
+  if(step===1) return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="mh">
+          <div style={{fontFamily:"var(--disp)",fontSize:18}}>APPLICATION SENT</div>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+        </div>
+        <div className="mb" style={{textAlign:"center",padding:"40px 24px"}}>
+          <div style={{width:60,height:60,background:"var(--red)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:26}}>✓</div>
+          <h3 style={{fontFamily:"var(--disp)",fontSize:26,marginBottom:10}}>YOU'RE IN THE QUEUE</h3>
+          <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.8,marginBottom:22}}>
+            Your application to <strong style={{color:"var(--t1)"}}>{company.name}</strong> has been submitted.<br/>
+            <span style={{color:"var(--t3)"}}>{company.contact}</span> will review it within 24 hours.
+          </p>
+          <div className="card" style={{textAlign:"left",marginBottom:22}}>
+            <div style={{fontSize:10,letterSpacing:2,color:"var(--t3)",marginBottom:5}}>YOUR CONTACT AT {company.name.toUpperCase()}</div>
+            <div style={{fontSize:14,color:"var(--t1)"}}>{company.contact}</div>
+            <div style={{fontSize:12,color:"var(--t3)",marginTop:3}}>{company.type} · {company.stage}</div>
+          </div>
+          <p style={{fontSize:12,color:"var(--t3)",marginBottom:18}}>Want to message them directly while you wait?</p>
+          <button className="btn br" onClick={()=>{onClose();openChat(company);}}>MESSAGE {company.name.toUpperCase()} →</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="mh">
+          <div>
+            <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:3}}>APPLYING TO</div>
+            <div style={{fontFamily:"var(--disp)",fontSize:20,color:"var(--t1)"}}>{company.name}</div>
+          </div>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+        </div>
+        <div className="mb">
+          <div className="card" style={{marginBottom:18,background:"var(--s2)"}}>
+            <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.75}}>{company.looking}</p>
+            <div style={{display:"flex",justifyContent:"space-between",marginTop:11,paddingTop:11,borderTop:"1.5px solid var(--bdr)"}}>
+              <span style={{fontSize:12,color:"var(--t3)"}}>Budget: <span style={{color:"var(--t1)"}}>{company.budget}</span></span>
+              <span style={{fontSize:12,color:"var(--t3)"}}>{company.stage}</span>
+            </div>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:13}}>
+            {fields.map(f=>(
+              <div key={f.k}>
+                <div className="lbl">{f.l}</div>
+                {f.type==="textarea"
+                  ? <textarea className="inp" rows={3} placeholder={f.ph||`Enter...`} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  : <input className="inp" type="text" placeholder={f.ph||`Enter...`} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                }
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="mf" style={{display:"flex",gap:10}}>
+          <button className="btn br" onClick={()=>setStep(1)}>SUBMIT APPLICATION →</button>
+          <button className="btn bg" onClick={onClose}>CANCEL</button>
+        </div>
+      </div>
+    </div>
+  );
+}
