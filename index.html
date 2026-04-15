@@ -1,116 +1,226 @@
-import { useState, useEffect, useRef } from "react";
-
-const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Bebas+Neue&display=swap');`;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sinister 5ive</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    :root{
+      --red:#e53535;--red-bg:rgba(229,53,53,0.1);
+      --bg:#0d0d0d;--s1:#161616;--s2:#1e1e1e;
+      --bdr:#282828;--bdr2:#333;
+      --t1:#f2f2f2;--t2:#aaa;--t3:#666;
+      --mono:'DM Mono',monospace;--disp:'Anton',sans-serif;
+    }
+    body{background:var(--bg);color:var(--t1);font-family:var(--mono);}
+    ::-webkit-scrollbar{width:3px;}
+    ::-webkit-scrollbar-thumb{background:var(--red);}
+    ::selection{background:var(--red);color:#fff;}
+    @keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes scan{0%{top:-4px}100%{top:100vh}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes slide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+    .u1{animation:up .45s ease both;}
+    .u2{animation:up .45s .1s ease both;}
+    .u3{animation:up .45s .2s ease both;}
+    .scanline{position:fixed;left:0;width:100%;height:3px;background:rgba(229,53,53,.05);z-index:9999;pointer-events:none;animation:scan 12s linear infinite;}
+    .btn{cursor:pointer;border:none;font-family:var(--disp);letter-spacing:2px;transition:all .18s;display:inline-flex;align-items:center;gap:8px;}
+    .br{background:var(--red);color:#fff;padding:13px 28px;font-size:15px;border-radius:2px;}
+    .br:hover{background:#f04040;transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,53,53,.35);}
+    .bo{background:transparent;color:var(--red);border:1.5px solid var(--red);padding:12px 26px;font-size:15px;border-radius:2px;}
+    .bo:hover{background:var(--red-bg);transform:translateY(-1px);}
+    .bg{background:transparent;color:var(--t2);border:1.5px solid var(--bdr);padding:9px 18px;font-size:12px;font-family:var(--mono);letter-spacing:1px;border-radius:2px;}
+    .bg:hover{border-color:var(--bdr2);color:var(--t1);}
+    .bsm{padding:8px 16px;font-size:12px;letter-spacing:1.5px;}
+    .card{background:var(--s1);border:1.5px solid var(--bdr);padding:24px;transition:border-color .22s,transform .22s,box-shadow .22s;border-radius:4px;}
+    .card:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.55);}
+    .cc{cursor:pointer;}
+    .cc:hover{border-color:var(--red)!important;box-shadow:0 0 0 1px rgba(229,53,53,.12),0 10px 28px rgba(0,0,0,.55);}
+    .tag{display:inline-block;padding:4px 10px;background:var(--s2);border:1.5px solid var(--bdr);font-size:11px;color:var(--t2);border-radius:2px;transition:all .18s;cursor:pointer;}
+    .tag:hover,.tag.on{border-color:var(--red);color:var(--red);background:var(--red-bg);}
+    .inp{width:100%;background:var(--s1);border:1.5px solid var(--bdr);color:var(--t1);padding:13px 15px;font-family:var(--mono);font-size:13px;outline:none;border-radius:2px;transition:border-color .18s;line-height:1.5;}
+    .inp:focus{border-color:var(--red);}
+    .inp::placeholder{color:var(--t3);}
+    select.inp option{background:var(--s1);}
+    .lbl{font-size:10px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:6px;}
+    .nav{padding:15px 40px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(13,13,13,.96);backdrop-filter:blur(16px);z-index:200;}
+    .logo{font-family:var(--disp);font-size:20px;letter-spacing:3px;cursor:pointer;}
+    .logo span{color:var(--red);}
+    .sbar{height:3px;background:var(--s2);border-radius:2px;overflow:hidden;}
+    .sfill{height:100%;background:linear-gradient(90deg,var(--red),#ff6535);border-radius:2px;}
+    .live{width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;display:inline-block;margin-right:7px;}
+    .stat{border-left:2.5px solid var(--red);padding-left:14px;}
+    .stat-n{font-family:var(--disp);font-size:38px;line-height:1;color:var(--t1);}
+    .stat-l{font-size:10px;letter-spacing:3px;color:var(--t3);margin-top:3px;}
+    .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:inline-block;flex-shrink:0;}
+    .ticker{overflow:hidden;white-space:nowrap;border-top:1.5px solid var(--bdr);border-bottom:1.5px solid var(--bdr);padding:9px 0;}
+    .ti{display:inline-block;animation:mq 28s linear infinite;font-size:11px;letter-spacing:3px;color:var(--t3);}
+    .ti .r{color:var(--red);margin:0 28px;}
+    .role-card{border:1.5px solid var(--bdr);padding:36px;cursor:pointer;transition:all .25s;flex:1;border-radius:4px;}
+    .role-card:hover,.role-card.sel{border-color:var(--red);background:var(--red-bg);}
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
+    .modal{background:var(--s1);border:1.5px solid var(--bdr2);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;border-radius:6px;overflow:hidden;}
+    .mh{padding:18px 22px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+    .mb{flex:1;overflow-y:auto;padding:18px 22px;}
+    .mf{padding:14px 22px;border-top:1.5px solid var(--bdr);flex-shrink:0;}
+    .chat-row{display:flex;gap:10px;margin-bottom:14px;animation:slide .28s ease;}
+    .bubble{padding:10px 14px;border-radius:3px;font-size:13px;line-height:1.65;max-width:82%;}
+    .b-them{background:var(--s2);color:var(--t1);}
+    .b-me{background:var(--red);color:#fff;margin-left:auto;}
+    .av{width:30px;height:30px;background:var(--s2);border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:14px;color:var(--t2);flex-shrink:0;border-radius:3px;}
+    .dots-p{display:flex;gap:6px;margin-bottom:26px;}
+    .dot-p{width:28px;height:2px;background:var(--bdr);border-radius:1px;transition:background .25s;}
+    .dot-p.on{background:var(--red);}
+    @media(max-width:680px){.nav{padding:13px 18px;}.role-cards{flex-direction:column!important;}}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
 
 const ENGINEERS = [
-  { id:1, name:"Maya Osei", handle:"@mayaosei_b2b", connections:"14,200", niche:"SaaS Growth", ratePer100:"$240", bio:"Top 1% LinkedIn voice. Specialised in SaaS growth narratives. 3 successful exits, advisor to 12 funded startups.", tags:["Growth","PLG","Series A-B"], score:98, location:"San Francisco, CA", avgEngagement:"6.2%", responseTime:"< 2 hrs", persona:"You are Maya Osei, a sharp B2B LinkedIn content creator based in San Francisco who specialises in SaaS growth. You're professional but direct and a little busy-sounding. You charge $240 per 100 likes+comments. Keep all replies to 1–3 short sentences, conversational and natural." },
-  { id:2, name:"Jordan Vance", handle:"@jordanvance_rev", connections:"22,800", niche:"RevOps & Sales", ratePer100:"$380", bio:"Ex-Salesforce AE turned creator. Built demand gen engines for 4 companies from $0 to Series C. Only works with enterprise SaaS.", tags:["RevOps","Enterprise","CRM"], score:95, location:"New York, NY", avgEngagement:"4.8%", responseTime:"< 4 hrs", persona:"You are Jordan Vance, a former Salesforce AE now a top LinkedIn creator for RevOps and enterprise sales content. You're confident and selective — you only work with companies doing $1M+ ARR. You charge $380 per 100 likes+comments. Keep replies 1–3 sentences, direct and no-nonsense." },
-  { id:3, name:"Priya Mehta", handle:"@priyamehta_plg", connections:"9,400", niche:"Product-Led Growth", ratePer100:"$180", bio:"Onboarding & activation obsessed. 47% avg post engagement. Helped 8 PLG companies double trial-to-paid rates through organic LinkedIn.", tags:["PLG","Onboarding","UX"], score:91, location:"Austin, TX", avgEngagement:"7.1%", responseTime:"< 6 hrs", persona:"You are Priya Mehta, a LinkedIn creator focused on product-led growth content. You're warm, enthusiastic, and data-driven. You charge $180 per 100 likes+comments. Keep replies 1–3 sentences, conversational and friendly." },
-  { id:4, name:"Cole Drummond", handle:"@coledrummond_cfo", connections:"31,100", niche:"Fintech & Finance SaaS", ratePer100:"$620", bio:"CFO turned LinkedIn creator. Trusted by 12 Series B companies. Your buyers are CFOs and VPs of Finance — and they follow me.", tags:["Fintech","CFO Audience","ARR"], score:99, location:"Chicago, IL", avgEngagement:"9.3%", responseTime:"< 12 hrs", persona:"You are Cole Drummond, a former CFO turned top LinkedIn creator for fintech and finance SaaS. You're selective and expensive at $620 per 100 likes+comments, and you know your worth. Your audience is CFOs and finance decision-makers. Keep replies 1–3 sentences, polished and brief." },
-  { id:5, name:"Tariq Nasser", handle:"@tariqnasser_ai", connections:"18,600", niche:"AI & DevTools", ratePer100:"$290", bio:"Engineer-turned-creator. Writes about AI tooling, developer experience, and the future of SaaS infrastructure. Technical audience with serious budget.", tags:["AI/ML","DevTools","Technical"], score:93, location:"Seattle, WA", avgEngagement:"5.4%", responseTime:"< 3 hrs", persona:"You are Tariq Nasser, a former software engineer turned LinkedIn creator covering AI tools and developer-focused SaaS. You're technical but approachable, and your audience are engineering leaders and CTOs. You charge $290 per 100 likes+comments. Keep replies 1–3 sentences, nerdy but conversational." },
-  { id:6, name:"Simone Leblanc", handle:"@simoneleblanc_hr", connections:"12,900", niche:"HR Tech & People Ops", ratePer100:"$210", bio:"Ex-CHRO, now helping HR SaaS companies reach the exact audience that signs the cheques. 85% of my followers are HR directors or above.", tags:["HR Tech","People Ops","CHRO"], score:89, location:"Toronto, ON", avgEngagement:"6.8%", responseTime:"< 5 hrs", persona:"You are Simone Leblanc, an ex-CHRO turned LinkedIn creator focused on HR tech content. You're empathetic and professional. Your audience is senior HR leaders. You charge $210 per 100 likes+comments. Keep replies 1–3 sentences, warm but concise." },
+  {
+    id:1, name:"Maya Osei", handle:"@mayaosei_b2b", connections:"14,200", niche:"SaaS Growth", ratePer100:"$240",
+    bio:"Top 1% LinkedIn voice. Specialised in SaaS growth narratives. 3 successful exits, advisor to 12 funded startups.",
+    tags:["Growth","PLG","Series A-B"], score:98, location:"San Francisco, CA",
+    replies:[
+      "Hey! Thanks for reaching out. I'm pretty selective with partnerships but I'm open to hearing more — what's the product and who's your ICP?",
+      "Got it. My audience skews heavily toward growth-stage founders and VPs of Sales, so if that matches your buyer profile we'd be a strong fit.",
+      "My rate is $240 per 100 likes and comments on each post. I typically do a 3-post pilot first so both sides can evaluate before committing to a retainer.",
+      "Turnaround is usually 5-7 business days per post. I handle the copy, you review and approve before anything goes live.",
+      "Send me your deck or a Loom walkthrough of the product and I'll let you know if it's something I'd authentically post about."
+    ]
+  },
+  {
+    id:2, name:"Jordan Vance", handle:"@jordanvance_rev", connections:"22,800", niche:"RevOps & Sales", ratePer100:"$380",
+    bio:"Ex-Salesforce AE turned creator. Built demand gen engines for 4 companies from $0 to Series C. Only works with enterprise SaaS.",
+    tags:["RevOps","Enterprise","CRM"], score:95, location:"New York, NY",
+    replies:[
+      "Jordan here. I only work with companies doing $1M ARR minimum — not because I'm difficult, just because my audience are enterprise buyers and they can smell inauthenticity.",
+      "My rate is $380 per 100 engagements. Non-negotiable. What I deliver in return is access to 22K+ decision-makers in sales and revenue operations.",
+      "I've driven over $4M in attributed pipeline for clients in the last 18 months. I track everything with UTMs and share a full performance report monthly.",
+      "What's the ACV on your product? That tells me a lot about whether this is worth it for both of us.",
+      "If the numbers make sense I can have a first post drafted within 2 weeks. I need a 30 min product walkthrough first — no exceptions."
+    ]
+  },
+  {
+    id:3, name:"Priya Mehta", handle:"@priyamehta_plg", connections:"9,400", niche:"Product-Led Growth", ratePer100:"$180",
+    bio:"Onboarding & activation obsessed. 47% avg post engagement. Helped 8 PLG companies double trial-to-paid rates through organic LinkedIn.",
+    tags:["PLG","Onboarding","UX"], score:91, location:"Austin, TX",
+    replies:[
+      "Hi! So excited you reached out — I love working with PLG companies. What stage are you at and what's the main activation problem you're trying to solve?",
+      "My content style is very narrative-driven. I take real user journeys and turn them into posts that resonate with product and growth teams.",
+      "I charge $180 per 100 likes and comments. My engagement rate is 7.1% which is pretty unusual for B2B LinkedIn — most creators are at 1-2%.",
+      "I do require that I actually use the product before writing about it. Authenticity is everything for my audience — they'd clock a fake endorsement immediately.",
+      "I'm currently working with 3 other PLG companies so I have limited bandwidth, but if the product is genuinely interesting I'll make room."
+    ]
+  },
+  {
+    id:4, name:"Cole Drummond", handle:"@coledrummond_cfo", connections:"31,100", niche:"Fintech & Finance SaaS", ratePer100:"$620",
+    bio:"CFO turned LinkedIn creator. Trusted by 12 Series B companies. Your buyers are CFOs and VPs of Finance — and they follow me.",
+    tags:["Fintech","CFO Audience","ARR"], score:99, location:"Chicago, IL",
+    replies:[
+      "Cole here. My rate is $620 per 100 engagements. If that's a stretch for your budget, I'm probably not the right fit right now.",
+      "My audience is 31K finance leaders — CFOs, VPs of Finance, Controllers. If your product isn't built for them, this won't convert.",
+      "I've been doing this for 3 years. My posts have directly influenced 8-figure procurement decisions at Fortune 500 companies. The audience is that senior.",
+      "I only take on 2 new clients per quarter. If you're serious, send me a one-pager on your product and your target buyer profile.",
+      "What I won't do: generic awareness posts. Every piece of content I write has a specific CTA and a measurable outcome. That's why my clients stay."
+    ]
+  },
+  {
+    id:5, name:"Tariq Nasser", handle:"@tariqnasser_ai", connections:"18,600", niche:"AI & DevTools", ratePer100:"$290",
+    bio:"Engineer-turned-creator. Writes about AI tooling, developer experience, and the future of SaaS infrastructure. Technical audience with serious budget.",
+    tags:["AI/ML","DevTools","Technical"], score:93, location:"Seattle, WA",
+    replies:[
+      "Hey! Always interested in talking to devtool and AI companies. What does your product do at a technical level?",
+      "My audience are engineers, CTOs, and technical founders. If your product requires a non-technical buyer you're probably better off with a different creator.",
+      "I charge $290 per 100 engagements. I also do occasional long-form teardown posts which tend to perform really well — those are priced separately.",
+      "I'll be honest upfront — if I try the product and I don't think it's genuinely good, I won't post about it. I'd rather lose the deal than lose my credibility.",
+      "What's the integration story? My audience cares a lot about how tools fit into existing workflows. That's usually the angle that drives the most engagement."
+    ]
+  },
+  {
+    id:6, name:"Simone Leblanc", handle:"@simoneleblanc_hr", connections:"12,900", niche:"HR Tech & People Ops", ratePer100:"$210",
+    bio:"Ex-CHRO, now helping HR SaaS companies reach the exact audience that signs the cheques. 85% of my followers are HR directors or above.",
+    tags:["HR Tech","People Ops","CHRO"], score:89, location:"Toronto, ON",
+    replies:[
+      "Hi there! HR tech is my whole world so I'm always happy to chat. Tell me a bit about your product — what problem does it solve for HR teams?",
+      "85% of my followers are HR Director level or above. If you're trying to reach CHROs and VPs of People, there's really no better audience on LinkedIn.",
+      "My rate is $210 per 100 engagements. I'm transparent that I work with sponsors — my audience knows and they trust my judgment because I'm selective.",
+      "I typically see the best results with content around employee experience, retention, and compliance topics. What angle were you thinking?",
+      "I'm based in Toronto and work with companies across North America and Europe. Happy to jump on a quick call if you want to explore this further."
+    ]
+  },
 ];
 
 const COMPANIES = [
-  { id:1, name:"Vesper HQ", type:"Revenue Intelligence", stage:"Series B", budget:"$5K–$10K/mo", icp:"Revenue leaders at mid-market SaaS", looking:"Thought leadership posts and demo-driven content for LinkedIn. We want to own the 'revenue intelligence' conversation.", tags:["Series B","Revenue","Mid-Market"], logo:"V", contact:"Marcus Webb, Head of Marketing", persona:"You are Marcus Webb, Head of Marketing at Vesper HQ, a Series B revenue intelligence platform. You're looking for LinkedIn creators to help generate pipeline. Budget is $5–10K/mo. Be professional, direct, and results-focused. Keep replies 1–3 sentences." },
-  { id:2, name:"Driftmark AI", type:"AI Workflow Automation", stage:"Seed", budget:"$2K–$5K/mo", icp:"Ops managers and no-code builders at SMBs", looking:"Product-led content showing real use cases. We want creators who actually use tools like ours and can speak authentically.", tags:["Seed","AI","No-Code"], logo:"D", contact:"Aisha Fontaine, Founder", persona:"You are Aisha Fontaine, founder of Driftmark AI, a seed-stage AI workflow automation startup. You're scrappy and excited. Budget is $2–5K/mo. Be friendly with startup energy. Keep replies 1–3 sentences." },
-  { id:3, name:"Caldra", type:"B2B Data Enrichment", stage:"Series C", budget:"$10K+/mo", icp:"VP Sales and SDR teams at enterprise SaaS", looking:"Enterprise-grade creators with a strong sales and ops following. We want 3–4 creators on retainer for ongoing campaigns.", tags:["Series C","Data","Enterprise"], logo:"C", contact:"Derek Okafor, VP Marketing", persona:"You are Derek Okafor, VP of Marketing at Caldra, a Series C B2B data enrichment platform. You have serious budget ($10K+/mo) and high standards. Be polished and direct. Keep replies 1–3 sentences." },
-  { id:4, name:"Lumos Security", type:"Cybersecurity SaaS", stage:"Series A", budget:"$3K–$6K/mo", icp:"CISOs and IT security managers", looking:"Technical security content from credible voices in the cybersecurity space. Compliance and zero-trust are our core topics.", tags:["Series A","Security","Technical"], logo:"L", contact:"Nina Volkov, Demand Gen Lead", persona:"You are Nina Volkov, Demand Gen Lead at Lumos Security, a Series A cybersecurity SaaS. You're looking for technical, credible LinkedIn voices in the security and IT space. Budget $3–6K/mo. Keep replies 1–3 sentences, precise and professional." },
+  {
+    id:1, name:"Vesper HQ", type:"Revenue Intelligence", stage:"Series B", budget:"$5K-$10K/mo",
+    icp:"Revenue leaders at mid-market SaaS", looking:"Thought leadership posts and demo-driven content for LinkedIn. We want to own the revenue intelligence conversation.",
+    tags:["Series B","Revenue","Mid-Market"], logo:"V", contact:"Marcus Webb, Head of Marketing",
+    replies:[
+      "Thanks for reaching out. We're looking for creators with a strong revenue and sales ops following — ideally VP Sales or CRO level audience. Does that match your profile?",
+      "Our budget is $5-10K per month depending on volume and engagement. We're looking for at least 2 posts per week to start.",
+      "We're Series B, just raised $24M. The product tracks revenue signals across the entire GTM stack. Think Gong meets Clari but with better integrations.",
+      "We've worked with 3 creators before. The ones that performed best were very native — no corporate speak, just genuine takes on revenue strategy.",
+      "Can you send me your recent post metrics? Engagement rate and audience breakdown are the two things I care most about."
+    ]
+  },
+  {
+    id:2, name:"Driftmark AI", type:"AI Workflow Automation", stage:"Seed", budget:"$2K-$5K/mo",
+    icp:"Ops managers and no-code builders at SMBs", looking:"Product-led content showing real use cases. We want creators who actually use tools like ours and can speak authentically.",
+    tags:["Seed","AI","No-Code"], logo:"D", contact:"Aisha Fontaine, Founder",
+    replies:[
+      "Hey! I'm Aisha, founder of Driftmark. We're early stage but moving fast — just closed our seed round last month. Super excited to find the right creator partners.",
+      "We're looking for people who genuinely geek out on automation and no-code tools. If you've built workflows yourself you'll immediately get what we're doing.",
+      "Budget is $2-5K/mo to start. We're scrappy but we pay on time and we're incredibly collaborative — we treat creators like actual partners, not vendors.",
+      "The product connects AI agents to your existing tools — Notion, Slack, Airtable, etc. — and automates repetitive ops tasks. It's genuinely cool, I promise.",
+      "Would love to give you a free trial account to play with. Best way to see if it's something you'd authentically talk about."
+    ]
+  },
+  {
+    id:3, name:"Caldra", type:"B2B Data Enrichment", stage:"Series C", budget:"$10K+/mo",
+    icp:"VP Sales and SDR teams at enterprise SaaS", looking:"Enterprise-grade creators with a strong sales and ops following. We want 3-4 creators on retainer for ongoing campaigns.",
+    tags:["Series C","Data","Enterprise"], logo:"C", contact:"Derek Okafor, VP Marketing",
+    replies:[
+      "Derek here. We're at Series C, $60M raised, and we're ready to invest seriously in creator-led content. We're not looking for one-off posts — we want long-term retainer relationships.",
+      "Budget is $10K+ per month per creator. We expect consistent output, detailed reporting, and exclusivity in the data enrichment category.",
+      "Our ICP is VP Sales and RevOps leaders at enterprise SaaS companies — 500+ employees, $10M+ ARR. If your audience skews that direction you're exactly who we're looking for.",
+      "We've had great results with creator content outperforming paid ads by 4:1 on pipeline attribution. This is a core part of our GTM now.",
+      "What's your current audience breakdown by job title and company size? That's the first thing I'll look at before moving forward."
+    ]
+  },
+  {
+    id:4, name:"Lumos Security", type:"Cybersecurity SaaS", stage:"Series A", budget:"$3K-$6K/mo",
+    icp:"CISOs and IT security managers", looking:"Technical security content from credible voices in the cybersecurity space. Compliance and zero-trust are our core topics.",
+    tags:["Series A","Security","Technical"], logo:"L", contact:"Nina Volkov, Demand Gen Lead",
+    replies:[
+      "Hi, Nina from Lumos. We're looking for creators with real security credibility — not just people who post about tech generally but people the CISO community actually respects.",
+      "Our topics are zero-trust architecture, compliance automation, and identity security. The content needs to be technically accurate or our audience will tear it apart.",
+      "Budget is $3-6K per month. We're flexible on format — could be LinkedIn posts, short videos, or a mix. What do you typically find performs best for technical audiences?",
+      "We just launched our SOC 2 Type II compliance automation module. Would love to find a creator who can explain why that matters without making it sound like a press release.",
+      "Do you have any experience posting about security topics? Even tangentially — DevSecOps, cloud security, compliance? That would make this a lot easier to scope."
+    ]
+  },
 ];
 
-async function askClaude(systemPrompt, history) {
-  try {
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:systemPrompt, messages:history }),
-    });
-    const data = await res.json();
-    return data.content?.[0]?.text || "Let me get back to you on that.";
-  } catch { return "Let me get back to you on that."; }
+// Fake chat — cycles through pre-written replies
+function getFakeReply(target, msgCount) {
+  const replies = target.replies || [];
+  const idx = Math.min(msgCount, replies.length - 1);
+  return replies[idx] || "I'll have my team follow up with you shortly.";
 }
 
-const CSS = `
-${FONTS}
-*{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --red:#e53535;
-  --red-bg:rgba(229,53,53,0.1);
-  --bg:#0d0d0d;
-  --s1:#161616;
-  --s2:#1e1e1e;
-  --bdr:#282828;
-  --bdr2:#333;
-  --t1:#f2f2f2;
-  --t2:#aaa;
-  --t3:#666;
-  --mono:'DM Mono',monospace;
-  --disp:'Anton',sans-serif;
-}
-body{background:var(--bg);color:var(--t1);font-family:var(--mono);}
-::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--red);}
-::selection{background:var(--red);color:#fff;}
-@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes scan{0%{top:-4px}100%{top:100vh}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-@keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes slide{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
-.u1{animation:up .45s ease both;}
-.u2{animation:up .45s .1s ease both;}
-.u3{animation:up .45s .2s ease both;}
-.u4{animation:up .45s .3s ease both;}
-.scanline{position:fixed;left:0;width:100%;height:3px;background:rgba(229,53,53,.05);z-index:9999;pointer-events:none;animation:scan 12s linear infinite;}
-.btn{cursor:pointer;border:none;font-family:var(--disp);letter-spacing:2px;transition:all .18s;display:inline-flex;align-items:center;gap:8px;}
-.br{background:var(--red);color:#fff;padding:13px 28px;font-size:15px;border-radius:2px;}
-.br:hover{background:#f04040;transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,53,53,.35);}
-.bo{background:transparent;color:var(--red);border:1.5px solid var(--red);padding:12px 26px;font-size:15px;border-radius:2px;}
-.bo:hover{background:var(--red-bg);transform:translateY(-1px);}
-.bg{background:transparent;color:var(--t2);border:1.5px solid var(--bdr);padding:9px 18px;font-size:12px;font-family:var(--mono);letter-spacing:1px;border-radius:2px;}
-.bg:hover{border-color:var(--bdr2);color:var(--t1);}
-.bsm{padding:8px 16px;font-size:12px;letter-spacing:1.5px;}
-.card{background:var(--s1);border:1.5px solid var(--bdr);padding:24px;transition:border-color .22s,transform .22s,box-shadow .22s;border-radius:4px;}
-.card:hover{border-color:var(--bdr2);transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,0,0,.55);}
-.cc{cursor:pointer;}.cc:hover{border-color:var(--red)!important;box-shadow:0 0 0 1px rgba(229,53,53,.12),0 10px 28px rgba(0,0,0,.55);}
-.tag{display:inline-block;padding:4px 10px;background:var(--s2);border:1.5px solid var(--bdr);font-size:11px;letter-spacing:.3px;color:var(--t2);border-radius:2px;transition:all .18s;cursor:pointer;}
-.tag:hover,.tag.on{border-color:var(--red);color:var(--red);background:var(--red-bg);}
-.inp{width:100%;background:var(--s1);border:1.5px solid var(--bdr);color:var(--t1);padding:13px 15px;font-family:var(--mono);font-size:13px;outline:none;border-radius:2px;transition:border-color .18s;line-height:1.5;}
-.inp:focus{border-color:var(--red);}
-.inp::placeholder{color:var(--t3);}
-select.inp option{background:var(--s1);}
-.lbl{font-size:10px;letter-spacing:3px;color:var(--red);text-transform:uppercase;margin-bottom:6px;}
-.nav{padding:15px 40px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:rgba(13,13,13,.96);backdrop-filter:blur(16px);z-index:200;}
-.logo{font-family:var(--disp);font-size:20px;letter-spacing:3px;cursor:pointer;}
-.logo span{color:var(--red);}
-.sbar{height:3px;background:var(--s2);border-radius:2px;overflow:hidden;}
-.sfill{height:100%;background:linear-gradient(90deg,var(--red),#ff6535);border-radius:2px;}
-.live{width:7px;height:7px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;display:inline-block;margin-right:7px;}
-.stat{border-left:2.5px solid var(--red);padding-left:14px;}
-.stat-n{font-family:var(--disp);font-size:38px;line-height:1;color:var(--t1);}
-.stat-l{font-size:10px;letter-spacing:3px;color:var(--t3);margin-top:3px;}
-.spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .65s linear infinite;display:inline-block;flex-shrink:0;}
-.ticker{overflow:hidden;white-space:nowrap;border-top:1.5px solid var(--bdr);border-bottom:1.5px solid var(--bdr);padding:9px 0;}
-.ti{display:inline-block;animation:mq 28s linear infinite;font-size:11px;letter-spacing:3px;color:var(--t3);}
-.ti .r{color:var(--red);margin:0 28px;}
-.role-card{border:1.5px solid var(--bdr);padding:36px;cursor:pointer;transition:all .25s;flex:1;border-radius:4px;}
-.role-card:hover,.role-card.sel{border-color:var(--red);background:var(--red-bg);}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--s1);border:1.5px solid var(--bdr2);width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;border-radius:6px;overflow:hidden;}
-.mh{padding:18px 22px;border-bottom:1.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.mb{flex:1;overflow-y:auto;padding:18px 22px;}
-.mf{padding:14px 22px;border-top:1.5px solid var(--bdr);flex-shrink:0;}
-.chat-row{display:flex;gap:10px;margin-bottom:14px;animation:slide .28s ease;}
-.bubble{padding:10px 14px;border-radius:3px;font-size:13px;line-height:1.65;max-width:82%;}
-.b-them{background:var(--s2);color:var(--t1);}
-.b-me{background:var(--red);color:#fff;margin-left:auto;}
-.av{width:30px;height:30px;background:var(--s2);border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-size:14px;color:var(--t2);flex-shrink:0;border-radius:3px;}
-.dots-p{display:flex;gap:6px;margin-bottom:26px;}
-.dot-p{width:28px;height:2px;background:var(--bdr);border-radius:1px;transition:background .25s;}
-.dot-p.on{background:var(--red);}
-@media(max-width:680px){.nav{padding:13px 18px;}.role-cards{flex-direction:column!important;}}
-`;
-
-export default function App() {
+function App() {
   const [screen, setScreen] = useState("landing");
   const [role, setRole] = useState(null);
   const [formData, setFormData] = useState({});
@@ -122,7 +232,6 @@ export default function App() {
 
   return (
     <>
-      <style>{CSS}</style>
       <div className="scanline"/>
       {screen==="landing"   && <Landing setScreen={setScreen} setRole={setRole}/>}
       {screen==="role"      && <ChooseRole setScreen={setScreen} role={role} setRole={setRole}/>}
@@ -141,7 +250,7 @@ function NavBar({setScreen, user, role}) {
       <div style={{display:"flex",gap:10,alignItems:"center"}}>
         {user ? (
           <>
-            <span style={{fontSize:11,color:"var(--t3)",letterSpacing:1}}><span style={{color:"var(--red)"}}>{role?.toUpperCase()}</span></span>
+            <span style={{fontSize:11,color:"var(--t3)",letterSpacing:1}}><span style={{color:"var(--red)"}}>{role&&role.toUpperCase()}</span></span>
             <button className="btn br bsm" onClick={()=>setScreen("dashboard")}>DASHBOARD</button>
           </>
         ) : (
@@ -156,10 +265,10 @@ function NavBar({setScreen, user, role}) {
 }
 
 function Landing({setScreen, setRole}) {
+  const words = ["B2B CONTENT DISTRIBUTION","LINKEDIN AMPLIFICATION","SAAS PIPELINE","DEMAND GENERATION","THOUGHT LEADERSHIP","PAY PER PERFORMANCE"];
   return (
     <div>
       <NavBar setScreen={setScreen} user={null}/>
-
       <section style={{padding:"72px 40px 56px",maxWidth:1160,margin:"0 auto"}}>
         <div className="u1" style={{display:"flex",alignItems:"center",gap:9,marginBottom:26}}>
           <span className="live"/>
@@ -189,21 +298,21 @@ function Landing({setScreen, setRole}) {
       </section>
 
       <div className="ticker">
-        <div className="ti">{[1,2].map(i=><span key={i}>{["B2B CONTENT DISTRIBUTION","LINKEDIN AMPLIFICATION","SAAS PIPELINE","DEMAND GENERATION","THOUGHT LEADERSHIP","PAY PER PERFORMANCE"].map(t=><span key={t}>{t}<span className="r">◆</span></span>)}</span>)}</div>
+        <div className="ti">{[0,1].map(i=><span key={i}>{words.map(t=><span key={t}>{t}<span className="r">◆</span></span>)}</span>)}</div>
       </div>
 
       <section style={{padding:"64px 40px",maxWidth:1160,margin:"0 auto"}}>
-        <div className="lbl u1">// HOW IT WORKS</div>
+        <div className="lbl">// HOW IT WORKS</div>
         <h2 className="u2" style={{fontFamily:"var(--disp)",fontSize:50,marginBottom:40,marginTop:6}}>TWO SIDES. ONE NETWORK.</h2>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14}}>
           {[
-            {r:"engineer",label:"01",title:"CONTENT ENGINEER",sub:"Monetize your audience",steps:["Submit LinkedIn handle & connection count","Get matched with SaaS brands in your niche","Agree on scope — paid per 100 likes+comments","Build long-term brand relationships"],cta:"JOIN AS ENGINEER"},
-            {r:"company",label:"02",title:"B2B SAAS COMPANY",sub:"Find your voice",steps:["Define your product, ICP, and goals","Set your monthly budget","Browse matched engineers & apply","Launch campaigns in 48 hours"],cta:"JOIN AS COMPANY"},
+            {r:"engineer",label:"01",title:"CONTENT ENGINEER",sub:"Monetize your audience",steps:["Submit LinkedIn handle and connection count","Get matched with SaaS brands in your niche","Agree on scope — paid per 100 likes+comments","Build long-term brand relationships"],cta:"JOIN AS ENGINEER"},
+            {r:"company",label:"02",title:"B2B SAAS COMPANY",sub:"Find your voice",steps:["Define your product, ICP, and goals","Set your monthly budget","Browse matched engineers and apply","Launch campaigns in 48 hours"],cta:"JOIN AS COMPANY"},
           ].map(s=>(
             <div key={s.r} className="card u3">
               <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:14}}>TYPE — {s.label}</div>
               <h3 style={{fontFamily:"var(--disp)",fontSize:28,color:"var(--t1)",marginBottom:4}}>{s.title}</h3>
-              <p style={{fontSize:12,color:"var(--t3)",marginBottom:18,letterSpacing:.5}}>{s.sub}</p>
+              <p style={{fontSize:12,color:"var(--t3)",marginBottom:18}}>{s.sub}</p>
               <div style={{marginBottom:24}}>
                 {s.steps.map((t,i)=>(
                   <div key={i} style={{display:"flex",gap:12,marginBottom:9}}>
@@ -228,7 +337,7 @@ function Landing({setScreen, setRole}) {
 
       <section style={{background:"var(--red)",padding:"72px 40px",textAlign:"center"}}>
         <h2 style={{fontFamily:"var(--disp)",fontSize:"clamp(52px,8vw,88px)",color:"#fff",lineHeight:.9,marginBottom:20}}>READY TO<br/>GET SINISTER?</h2>
-        <p style={{fontSize:14,color:"rgba(255,255,255,.8)",marginBottom:36,maxWidth:360,margin:"0 auto 36px"}}>Join the underground B2B content network. No fluff. Pay per performance only.</p>
+        <p style={{fontSize:14,color:"rgba(255,255,255,.8)",maxWidth:360,margin:"0 auto 36px"}}>Join the underground B2B content network. No fluff. Pay per performance only.</p>
         <div style={{display:"flex",gap:12,justifyContent:"center",flexWrap:"wrap"}}>
           <button style={{background:"#0d0d0d",color:"var(--red)",border:"none",padding:"13px 32px",fontFamily:"var(--disp)",fontSize:16,letterSpacing:3,cursor:"pointer",borderRadius:2}} onClick={()=>{setRole("engineer");setScreen("role");}}>ENGINEER ACCESS</button>
           <button style={{background:"transparent",color:"#fff",border:"2px solid #fff",padding:"11px 30px",fontFamily:"var(--disp)",fontSize:16,letterSpacing:3,cursor:"pointer",borderRadius:2}} onClick={()=>{setRole("company");setScreen("role");}}>COMPANY ACCESS</button>
@@ -237,7 +346,7 @@ function Landing({setScreen, setRole}) {
 
       <footer style={{padding:"26px 40px",borderTop:"1.5px solid var(--bdr)",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
         <div className="logo">SINISTER <span>5IVE</span></div>
-        <span style={{fontSize:11,color:"var(--t3)"}}>© 2026 SINISTER 5IVE</span>
+        <span style={{fontSize:11,color:"var(--t3)"}}>2026 SINISTER 5IVE</span>
         <div style={{display:"flex",gap:24}}>{["PRIVACY","TERMS","CONTACT"].map(l=><span key={l} style={{fontSize:11,letterSpacing:2,color:"var(--t3)",cursor:"pointer"}}>{l}</span>)}</div>
       </footer>
     </div>
@@ -246,20 +355,18 @@ function Landing({setScreen, setRole}) {
 
 function EngCard({e, onClick}) {
   return (
-    <div className={`card ${onClick?"cc":""}`} onClick={onClick}>
+    <div className={"card"+(onClick?" cc":"")} onClick={onClick}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
         <div>
           <div style={{fontFamily:"var(--disp)",fontSize:20,color:"var(--t1)",marginBottom:2}}>{e.name}</div>
-          <div style={{fontSize:11,color:"var(--red)",letterSpacing:.5}}>{e.handle}</div>
+          <div style={{fontSize:11,color:"var(--red)"}}>{e.handle}</div>
         </div>
         <div style={{textAlign:"right"}}>
           <div style={{fontFamily:"var(--disp)",fontSize:26,color:"var(--red)",lineHeight:1}}>{e.score}</div>
           <div style={{fontSize:9,color:"var(--t3)",letterSpacing:1}}>SCORE</div>
         </div>
       </div>
-      <div className="sbar" style={{marginBottom:13}}>
-        <div className="sfill" style={{width:`${e.score}%`}}/>
-      </div>
+      <div className="sbar" style={{marginBottom:13}}><div className="sfill" style={{width:e.score+"%"}}/></div>
       <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.75,marginBottom:13}}>{e.bio}</p>
       <div style={{display:"flex",gap:5,flexWrap:"wrap",marginBottom:13}}>
         {e.tags.map(t=><span key={t} className="tag" style={{cursor:"default"}}>{t}</span>)}
@@ -305,11 +412,11 @@ function ChooseRole({setScreen, role, setRole}) {
     <div style={{minHeight:"100vh"}}>
       <nav className="nav">
         <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
-        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer",letterSpacing:1}} onClick={()=>setScreen("landing")}>← BACK</span>
+        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer"}} onClick={()=>setScreen("landing")}>← BACK</span>
       </nav>
       <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"80px 40px",minHeight:"calc(100vh - 62px)"}}>
         <div className="u1" style={{textAlign:"center",marginBottom:42}}>
-          <div className="lbl" style={{justifyContent:"center",display:"flex"}}>// ACCESS REQUEST</div>
+          <div className="lbl" style={{display:"flex",justifyContent:"center"}}>// ACCESS REQUEST</div>
           <h1 style={{fontFamily:"var(--disp)",fontSize:58,lineHeight:.9,marginTop:8}}>WHO ARE YOU?</h1>
         </div>
         <div className="role-cards u2" style={{display:"flex",gap:13,maxWidth:760,width:"100%"}}>
@@ -317,7 +424,7 @@ function ChooseRole({setScreen, role, setRole}) {
             {r:"engineer",label:"01",title:"CONTENT\nENGINEER",desc:"You're a LinkedIn creator with a B2B audience. Work with SaaS companies and get paid per performance.",reqs:["LinkedIn presence with connections","B2B or professional niche","Active posting history"]},
             {r:"company",label:"02",title:"B2B SAAS\nCOMPANY",desc:"You're building or growing a SaaS product and need authentic LinkedIn reach to your ideal buyers.",reqs:["Defined ICP and content goals","Monthly content budget","Looking for authentic creators"]},
           ].map(s=>(
-            <div key={s.r} className={`role-card ${role===s.r?"sel":""}`} onClick={()=>setRole(s.r)}>
+            <div key={s.r} className={"role-card"+(role===s.r?" sel":"")} onClick={()=>setRole(s.r)}>
               <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:16}}>TYPE — {s.label}</div>
               <h2 style={{fontFamily:"var(--disp)",fontSize:34,lineHeight:1,marginBottom:14,whiteSpace:"pre-line"}}>{s.title}</h2>
               <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.8,marginBottom:18}}>{s.desc}</p>
@@ -343,25 +450,24 @@ function Signup({role, fd, formData, onSubmit, setScreen}) {
   const [step, setStep] = useState(0);
   const isEng = role==="engineer";
   const steps = isEng ? [
-    {title:"YOUR IDENTITY", fields:[{l:"Full Name",k:"name"},{l:"Email Address",k:"email"},{l:"Password",k:"pass",type:"password"}]},
-    {title:"LINKEDIN PROFILE", fields:[{l:"LinkedIn Handle",k:"handle",ph:"@yourhandle"},{l:"LinkedIn Connection Count",k:"connections",ph:"e.g. 14,200"},{l:"Primary Niche",k:"niche",type:"select",opts:["SaaS Growth","RevOps","Fintech","HR Tech","DevTools","AI/ML","Sales","Marketing","PLG","Cybersecurity","Data & Analytics","Other"]}]},
-    {title:"RATES & BIO", fields:[{l:"Rate per 100 Likes + Comments (USD)",k:"rate",ph:"e.g. $240"},{l:"Top Industries",k:"industries",ph:"e.g. B2B SaaS, Fintech, HR Tech"},{l:"About You",k:"bio",type:"textarea"}]},
+    {title:"YOUR IDENTITY",fields:[{l:"Full Name",k:"name"},{l:"Email Address",k:"email"},{l:"Password",k:"pass",type:"password"}]},
+    {title:"LINKEDIN PROFILE",fields:[{l:"LinkedIn Handle",k:"handle",ph:"@yourhandle"},{l:"LinkedIn Connection Count",k:"connections",ph:"e.g. 14,200"},{l:"Primary Niche",k:"niche",type:"select",opts:["SaaS Growth","RevOps","Fintech","HR Tech","DevTools","AI/ML","Sales","Marketing","PLG","Cybersecurity","Data & Analytics","Other"]}]},
+    {title:"RATES & BIO",fields:[{l:"Rate per 100 Likes + Comments (USD)",k:"rate",ph:"e.g. $240"},{l:"Top Industries",k:"industries",ph:"e.g. B2B SaaS, Fintech"},{l:"About You",k:"bio",type:"textarea"}]},
   ] : [
-    {title:"YOUR COMPANY", fields:[{l:"Company Name",k:"company"},{l:"Your Name",k:"name"},{l:"Email Address",k:"email"}]},
-    {title:"PRODUCT & ICP", fields:[{l:"What You Build",k:"product",ph:"e.g. Revenue intelligence platform"},{l:"Your ICP",k:"icp",ph:"e.g. VP Sales at mid-market SaaS"},{l:"What You're Looking For",k:"looking",type:"textarea"}]},
-    {title:"BUDGET & GOALS", fields:[{l:"Monthly Budget",k:"budget",type:"select",opts:["Under $1,000/mo","$1K–$2.5K/mo","$2.5K–$5K/mo","$5K–$10K/mo","$10K+/mo"]},{l:"Campaign Goals",k:"goals",ph:"e.g. Pipeline gen, brand awareness"},{l:"Additional Notes",k:"notes",type:"textarea"}]},
+    {title:"YOUR COMPANY",fields:[{l:"Company Name",k:"company"},{l:"Your Name",k:"name"},{l:"Email Address",k:"email"}]},
+    {title:"PRODUCT & ICP",fields:[{l:"What You Build",k:"product",ph:"e.g. Revenue intelligence platform"},{l:"Your ICP",k:"icp",ph:"e.g. VP Sales at mid-market SaaS"},{l:"What You're Looking For",k:"looking",type:"textarea"}]},
+    {title:"BUDGET & GOALS",fields:[{l:"Monthly Budget",k:"budget",type:"select",opts:["Under $1,000/mo","$1K-$2.5K/mo","$2.5K-$5K/mo","$5K-$10K/mo","$10K+/mo"]},{l:"Campaign Goals",k:"goals",ph:"e.g. Pipeline gen, brand awareness"},{l:"Additional Notes",k:"notes",type:"textarea"}]},
   ];
-  const {title, fields} = steps[step];
-
+  const {title,fields} = steps[step];
   return (
     <div style={{minHeight:"100vh"}}>
       <nav className="nav">
         <div className="logo" onClick={()=>setScreen("landing")}>SINISTER <span>5IVE</span></div>
-        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer",letterSpacing:1}} onClick={()=>step>0?setStep(s=>s-1):setScreen("role")}>← BACK</span>
+        <span style={{fontSize:12,color:"var(--t3)",cursor:"pointer"}} onClick={()=>step>0?setStep(s=>s-1):setScreen("role")}>← BACK</span>
       </nav>
       <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"60px 20px",minHeight:"calc(100vh - 62px)"}}>
         <div style={{width:"100%",maxWidth:480}} className="u1">
-          <div className="dots-p">{steps.map((_,i)=><div key={i} className={`dot-p ${i<=step?"on":""}`}/>)}</div>
+          <div className="dots-p">{steps.map((_,i)=><div key={i} className={"dot-p"+(i<=step?" on":"")}/>)}</div>
           <div className="lbl">// STEP {step+1} OF {steps.length} — {isEng?"ENGINEER":"COMPANY"}</div>
           <h2 style={{fontFamily:"var(--disp)",fontSize:44,marginBottom:28,marginTop:6}}>{title}</h2>
           <div style={{display:"flex",flexDirection:"column",gap:14,marginBottom:30}}>
@@ -369,10 +475,10 @@ function Signup({role, fd, formData, onSubmit, setScreen}) {
               <div key={f.k}>
                 <div className="lbl" style={{letterSpacing:2,fontSize:10}}>{f.l}</div>
                 {f.type==="textarea"
-                  ? <textarea className="inp" rows={4} placeholder={f.ph||`Enter ${f.l.toLowerCase()}...`} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  ? <textarea className="inp" rows={4} placeholder={f.ph||"Enter..."} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
                   : f.type==="select"
-                  ? <select className="inp" value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}><option value="">Select…</option>{f.opts.map(o=><option key={o}>{o}</option>)}</select>
-                  : <input className="inp" type={f.type||"text"} placeholder={f.ph||`Enter ${f.l.toLowerCase()}...`} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  ? <select className="inp" value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}><option value="">Select...</option>{f.opts.map(o=><option key={o}>{o}</option>)}</select>
+                  : <input className="inp" type={f.type||"text"} placeholder={f.ph||"Enter..."} value={formData[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
                 }
               </div>
             ))}
@@ -396,12 +502,12 @@ function Dashboard({user, role, setScreen, openChat, openApply}) {
   const [tag, setTag] = useState(null);
   const isEng = role==="engineer";
   const allTags = [...new Set(ENGINEERS.flatMap(e=>e.tags))];
-  const filtered = ENGINEERS.filter(e => {
-    const m = !q || e.name.toLowerCase().includes(q.toLowerCase()) || e.niche.toLowerCase().includes(q.toLowerCase()) || e.handle.toLowerCase().includes(q.toLowerCase());
-    const t = !tag || e.tags.includes(tag);
-    return m && t;
+  const filtered = ENGINEERS.filter(e=>{
+    const m = !q||e.name.toLowerCase().includes(q.toLowerCase())||e.niche.toLowerCase().includes(q.toLowerCase())||e.handle.toLowerCase().includes(q.toLowerCase());
+    const t = !tag||e.tags.includes(tag);
+    return m&&t;
   });
-
+  const displayName = (user&&(user.name||user.company))||"USER";
   return (
     <div>
       <nav className="nav">
@@ -413,32 +519,27 @@ function Dashboard({user, role, setScreen, openChat, openApply}) {
         </div>
         <div style={{display:"flex",gap:12,alignItems:"center"}}>
           <div style={{textAlign:"right"}}>
-            <div style={{fontSize:13,color:"var(--t1)"}}>{user?.name||user?.company||"USER"}</div>
+            <div style={{fontSize:13,color:"var(--t1)"}}>{displayName}</div>
             <div style={{fontSize:10,color:"var(--red)",letterSpacing:1}}>{isEng?"CONTENT ENGINEER":"COMPANY"}</div>
           </div>
-          <div style={{width:36,height:36,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:17,color:"#fff",borderRadius:2}}>
-            {(user?.name||user?.company||"U")[0]}
-          </div>
+          <div style={{width:36,height:36,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:17,color:"#fff",borderRadius:2}}>{displayName[0]}</div>
         </div>
       </nav>
-
       <div style={{maxWidth:1160,margin:"0 auto",padding:"36px 40px"}}>
         {tab==="find" && (
           <div className="u1">
             <div className="lbl">// {isEng?"BROWSE COMPANIES":"BROWSE ENGINEERS"}</div>
-            <h2 style={{fontFamily:"var(--disp)",fontSize:46,marginBottom:30,marginTop:6}}>
-              {isEng?"COMPANIES HIRING":"TOP ENGINEERS"}
-            </h2>
+            <h2 style={{fontFamily:"var(--disp)",fontSize:46,marginBottom:30,marginTop:6}}>{isEng?"COMPANIES HIRING":"TOP ENGINEERS"}</h2>
             {!isEng && (
               <>
-                <input className="inp" placeholder="Search by name, niche, or handle…" value={q} onChange={e=>setQ(e.target.value)} style={{maxWidth:400,marginBottom:14,display:"block"}}/>
+                <input className="inp" placeholder="Search by name, niche, or handle..." value={q} onChange={e=>setQ(e.target.value)} style={{maxWidth:400,marginBottom:14,display:"block"}}/>
                 <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:26}}>
-                  <span className={`tag ${!tag?"on":""}`} onClick={()=>setTag(null)}>ALL</span>
-                  {allTags.map(t=><span key={t} className={`tag ${tag===t?"on":""}`} onClick={()=>setTag(tag===t?null:t)}>{t}</span>)}
+                  <span className={"tag"+(!tag?" on":"")} onClick={()=>setTag(null)}>ALL</span>
+                  {allTags.map(t=><span key={t} className={"tag"+(tag===t?" on":"")} onClick={()=>setTag(tag===t?null:t)}>{t}</span>)}
                 </div>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(276px,1fr))",gap:13}}>
                   {filtered.map(e=><EngCard key={e.id} e={e} onClick={()=>openChat(e)}/>)}
-                  {!filtered.length && <div style={{gridColumn:"1/-1",textAlign:"center",padding:"60px 0",color:"var(--t3)"}}>
+                  {!filtered.length&&<div style={{gridColumn:"1/-1",textAlign:"center",padding:"60px 0",color:"var(--t3)"}}>
                     <div style={{fontFamily:"var(--disp)",fontSize:34,marginBottom:8}}>NO RESULTS</div>
                     <div style={{fontSize:12}}>Try a different search or filter</div>
                   </div>}
@@ -452,15 +553,14 @@ function Dashboard({user, role, setScreen, openChat, openApply}) {
             )}
           </div>
         )}
-
         {tab==="profile" && (
           <div className="u1">
             <div className="lbl">// YOUR PROFILE</div>
             <h2 style={{fontFamily:"var(--disp)",fontSize:46,marginBottom:32,marginTop:6}}>PROFILE</h2>
-            <div style={{display:"grid",gridTemplateColumns:"190px 1fr",gap:28,flexWrap:"wrap"}}>
+            <div style={{display:"grid",gridTemplateColumns:"190px 1fr",gap:28}}>
               <div>
-                <div style={{width:76,height:76,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:38,color:"#fff",borderRadius:2,marginBottom:14}}>{(user?.name||user?.company||"U")[0]}</div>
-                <div style={{fontFamily:"var(--disp)",fontSize:22,color:"var(--t1)",marginBottom:3}}>{user?.name||user?.company}</div>
+                <div style={{width:76,height:76,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:38,color:"#fff",borderRadius:2,marginBottom:14}}>{displayName[0]}</div>
+                <div style={{fontFamily:"var(--disp)",fontSize:22,color:"var(--t1)",marginBottom:3}}>{displayName}</div>
                 <div style={{fontSize:11,color:"var(--red)",letterSpacing:1,marginBottom:20}}>{isEng?"CONTENT ENGINEER":"B2B COMPANY"}</div>
                 <div className="stat" style={{marginBottom:18}}><div className="stat-n">0</div><div className="stat-l">ACTIVE DEALS</div></div>
                 <div className="stat"><div className="stat-n">0</div><div className="stat-l">MESSAGES</div></div>
@@ -487,6 +587,7 @@ function ChatModal({target, onClose}) {
   const [msgs, setMsgs] = useState([]);
   const [inp, setInp] = useState("");
   const [loading, setLoading] = useState(false);
+  const msgCount = useRef(0);
   const started = useRef(false);
   const bodyRef = useRef(null);
 
@@ -494,34 +595,30 @@ function ChatModal({target, onClose}) {
     if(started.current) return;
     started.current = true;
     setLoading(true);
-    const opener = isEng
-      ? "Hey! I saw your profile on Sinister 5ive. I'm interested in potentially working together — can you tell me more about what you typically deliver?"
-      : "Hi! I'm reaching out through Sinister 5ive. We're interested in working with your company. What kind of content creators are you currently looking for?";
-    askClaude(target.persona, [{role:"user",content:opener}]).then(r=>{
-      setMsgs([{from:"them",text:r}]);
+    setTimeout(()=>{
+      setMsgs([{from:"them", text:getFakeReply(target, 0)}]);
+      msgCount.current = 1;
       setLoading(false);
-    });
+    }, 1200);
   },[]);
 
   useEffect(()=>{
-    setTimeout(()=>bodyRef.current?.scrollTo({top:99999,behavior:"smooth"}),80);
+    setTimeout(()=>{ if(bodyRef.current) bodyRef.current.scrollTop=99999; },80);
   },[msgs]);
 
-  const send = async()=>{
+  const send = ()=>{
     if(!inp.trim()||loading) return;
     const txt = inp.trim(); setInp("");
-    const next = [...msgs,{from:"me",text:txt}];
-    setMsgs(next); setLoading(true);
-    const history = next.map(m=>({role:m.from==="me"?"user":"assistant",content:m.text}));
-    const r = await askClaude(target.persona, history);
-    setMsgs(p=>[...p,{from:"them",text:r}]);
-    setLoading(false);
+    setMsgs(p=>[...p,{from:"me",text:txt}]);
+    setLoading(true);
+    setTimeout(()=>{
+      setMsgs(p=>[...p,{from:"them",text:getFakeReply(target, msgCount.current)}]);
+      msgCount.current += 1;
+      setLoading(false);
+    }, 900 + Math.random()*800);
   };
 
   const av = isEng ? target.name[0] : target.logo;
-  const name = target.name;
-  const sub = isEng ? target.handle : target.contact;
-
   return (
     <div className="overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
       <div className="modal">
@@ -529,38 +626,36 @@ function ChatModal({target, onClose}) {
           <div style={{display:"flex",gap:12,alignItems:"center"}}>
             <div style={{width:40,height:40,background:"var(--red)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"var(--disp)",fontSize:20,color:"#fff",borderRadius:2,flexShrink:0}}>{av}</div>
             <div>
-              <div style={{fontFamily:"var(--disp)",fontSize:18,color:"var(--t1)"}}>{name}</div>
-              <div style={{fontSize:11,color:"var(--t3)",marginTop:1}}>{sub}</div>
+              <div style={{fontFamily:"var(--disp)",fontSize:18,color:"var(--t1)"}}>{target.name}</div>
+              <div style={{fontSize:11,color:"var(--t3)",marginTop:1}}>{isEng?target.handle:target.contact}</div>
             </div>
           </div>
-          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>X</button>
         </div>
-
         <div className="mb" ref={bodyRef}>
           {msgs.length===0&&loading&&(
             <div style={{display:"flex",gap:10,alignItems:"center",color:"var(--t3)",fontSize:12,padding:"8px 0"}}>
-              <span className="spin"/><span>Connecting…</span>
+              <span className="spin"/><span>Connecting...</span>
             </div>
           )}
           {msgs.map((m,i)=>(
             <div key={i} className="chat-row" style={{flexDirection:m.from==="me"?"row-reverse":"row"}}>
               {m.from==="them"&&<div className="av">{av}</div>}
-              <div className={`bubble ${m.from==="them"?"b-them":"b-me"}`}>{m.text}</div>
+              <div className={"bubble "+(m.from==="them"?"b-them":"b-me")}>{m.text}</div>
             </div>
           ))}
           {loading&&msgs.length>0&&(
             <div className="chat-row">
               <div className="av">{av}</div>
               <div className="bubble b-them" style={{display:"flex",gap:7,alignItems:"center",color:"var(--t3)"}}>
-                <span className="spin" style={{width:12,height:12,borderWidth:1.5}}/> typing…
+                <span className="spin" style={{width:12,height:12,borderWidth:1.5}}/> typing...
               </div>
             </div>
           )}
         </div>
-
         <div className="mf">
           <div style={{display:"flex",gap:10}}>
-            <input className="inp" placeholder="Type a message…" value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} style={{flex:1}}/>
+            <input className="inp" placeholder="Type a message..." value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&send()} style={{flex:1}}/>
             <button className="btn br" style={{padding:"12px 18px",fontSize:13}} onClick={send} disabled={loading}>SEND</button>
           </div>
         </div>
@@ -573,14 +668,13 @@ function ApplyModal({company, onClose, openChat}) {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({});
   const fd = (k,v)=>setForm(p=>({...p,[k]:v}));
-
   const fields = [
     {k:"name",l:"Your Full Name"},
     {k:"handle",l:"LinkedIn Handle",ph:"@yourhandle"},
     {k:"connections",l:"LinkedIn Connection Count",ph:"e.g. 9,400"},
     {k:"niche",l:"Your Content Niche",ph:"e.g. RevOps, SaaS Growth"},
     {k:"rate",l:"Rate per 100 Likes + Comments (USD)",ph:"e.g. $220"},
-    {k:"pitch",l:"Why are you a good fit for this company?",type:"textarea"},
+    {k:"pitch",l:"Why are you a good fit?",type:"textarea"},
   ];
 
   if(step===1) return (
@@ -588,14 +682,14 @@ function ApplyModal({company, onClose, openChat}) {
       <div className="modal">
         <div className="mh">
           <div style={{fontFamily:"var(--disp)",fontSize:18}}>APPLICATION SENT</div>
-          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>X</button>
         </div>
         <div className="mb" style={{textAlign:"center",padding:"40px 24px"}}>
           <div style={{width:60,height:60,background:"var(--red)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 18px",fontSize:26}}>✓</div>
           <h3 style={{fontFamily:"var(--disp)",fontSize:26,marginBottom:10}}>YOU'RE IN THE QUEUE</h3>
           <p style={{fontSize:13,color:"var(--t2)",lineHeight:1.8,marginBottom:22}}>
-            Your application to <strong style={{color:"var(--t1)"}}>{company.name}</strong> has been submitted.<br/>
-            <span style={{color:"var(--t3)"}}>{company.contact}</span> will review it within 24 hours.
+            Your application to <strong style={{color:"var(--t1)"}}>{company.name}</strong> has been submitted.
+            <br/><span style={{color:"var(--t3)"}}>{company.contact}</span> will review it within 24 hours.
           </p>
           <div className="card" style={{textAlign:"left",marginBottom:22}}>
             <div style={{fontSize:10,letterSpacing:2,color:"var(--t3)",marginBottom:5}}>YOUR CONTACT AT {company.name.toUpperCase()}</div>
@@ -617,7 +711,7 @@ function ApplyModal({company, onClose, openChat}) {
             <div style={{fontSize:10,letterSpacing:3,color:"var(--red)",marginBottom:3}}>APPLYING TO</div>
             <div style={{fontFamily:"var(--disp)",fontSize:20,color:"var(--t1)"}}>{company.name}</div>
           </div>
-          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>✕</button>
+          <button className="btn bg" style={{padding:"6px 12px"}} onClick={onClose}>X</button>
         </div>
         <div className="mb">
           <div className="card" style={{marginBottom:18,background:"var(--s2)"}}>
@@ -632,8 +726,8 @@ function ApplyModal({company, onClose, openChat}) {
               <div key={f.k}>
                 <div className="lbl">{f.l}</div>
                 {f.type==="textarea"
-                  ? <textarea className="inp" rows={3} placeholder={f.ph||`Enter...`} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
-                  : <input className="inp" type="text" placeholder={f.ph||`Enter...`} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  ? <textarea className="inp" rows={3} placeholder={f.ph||"Enter..."} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
+                  : <input className="inp" type="text" placeholder={f.ph||"Enter..."} value={form[f.k]||""} onChange={e=>fd(f.k,e.target.value)}/>
                 }
               </div>
             ))}
@@ -647,3 +741,9 @@ function ApplyModal({company, onClose, openChat}) {
     </div>
   );
 }
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App/>);
+</script>
+</body>
+</html>
